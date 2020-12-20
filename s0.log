@@ -1,0 +1,1345 @@
+Calling target program-options parser
+Adding interface s0-eth1 as port 1
+Adding interface s0-eth2 as port 2
+Adding interface s0-eth3 as port 3
+Server listening on 0.0.0.0:50051
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+Connection removed
+New connection
+Connection removed
+New connection
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+PACKET OUT
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+PACKET OUT
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+PACKET OUT
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+PACKET OUT
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+PACKET OUT
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+PACKET OUT
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+PACKET OUT
+Connection removed
+New connection
+P4Runtime SetForwardingPipelineConfig
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    packet_replication_engine_entry {
+      multicast_group_entry {
+        multicast_group_id: 1
+        replicas {
+          egress_port: 1
+          instance: 1
+        }
+        replicas {
+          egress_port: 2
+          instance: 2
+        }
+        replicas {
+          egress_port: 3
+          instance: 3
+        }
+        replicas {
+          egress_port: 4
+          instance: 4
+        }
+        replicas {
+          egress_port: 5
+          instance: 5
+        }
+        replicas {
+          egress_port: 64
+          instance: 64
+        }
+      }
+    }
+  }
+}
+P4Runtime Write
+device_id: 1
+election_id {
+  low: 1
+}
+updates {
+  type: INSERT
+  entity {
+    table_entry {
+      table_id: 33757179
+      match {
+        field_id: 1
+        exact {
+          value: "\000\000\000\000\000\000"
+        }
+      }
+      match {
+        field_id: 2
+        exact {
+          value: "\377\377\377\377\377\377"
+        }
+      }
+      action {
+        action {
+          action_id: 28371790
+        }
+      }
+    }
+  }
+}
+P4Runtime Read
+device_id: 1
+entities {
+  table_entry {
+  }
+}
+PACKET OUT
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN
+PACKET IN

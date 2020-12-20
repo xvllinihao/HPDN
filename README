@@ -1,0 +1,47 @@
+## Run the mininet topology (similar to the last chapter in the reader)
+
+```bash
+sudo python run_mininet.py --p4-file simple.p4
+```
+For all options run: python run_mininet.py -h
+
+## Run the controller (different terminal)
+
+```bash
+python controller.py
+
+```
+
+For all options run: python controller.py -h
+
+## Expected output from the controller:
+
+Installed P4 Program using SetForwardingPipelineConfig on s1
+Installed ingress forwarding rule on s0
+Installed ingress forwarding rule on s0
+Installed ingress forwarding rule on s0
+
+----- Reading tables rules for s0 -----
+MyIngress.ipv4_lpm:  hdr.ipv4.dstAddr ('\n\n\n\x01', 32) -> MyIngress.ipv4_forward port '\x00\x01'
+MyIngress.ipv4_lpm:  hdr.ipv4.dstAddr ('\n\n\n\x02', 32) -> MyIngress.ipv4_forward port '\x00\x02'
+MyIngress.ipv4_lpm:  hdr.ipv4.dstAddr ('\n\n\x03\x03', 32) -> MyIngress.ipv4_forward port '\x00\x03'
+
+
+
+## Test your application using ping (h1 ping s1, h2 ping s1). Output:
+mininet> h1 ping s1
+PING 10.10.3.3 (10.10.3.3) 56(84) bytes of data.
+64 bytes from 10.10.3.3: icmp_seq=1 ttl=64 time=0.348 ms
+64 bytes from 10.10.3.3: icmp_seq=2 ttl=64 time=0.286 ms
+
+--- 10.10.3.3 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1004ms
+rtt min/avg/max/mdev = 0.286/0.317/0.348/0.031 ms
+mininet> h2 ping s1
+PING 10.10.3.3 (10.10.3.3) 56(84) bytes of data.
+64 bytes from 10.10.3.3: icmp_seq=1 ttl=64 time=0.336 ms
+64 bytes from 10.10.3.3: icmp_seq=2 ttl=64 time=0.272 ms
+
+--- 10.10.3.3 ping statistics ---
+2 packets transmitted, 2 received, 0% packet loss, time 1029ms
+rtt min/avg/max/mdev = 0.272/0.304/0.336/0.032 ms
