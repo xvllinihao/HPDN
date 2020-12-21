@@ -3,11 +3,23 @@
     {
       "name" : "scalars_0",
       "id" : 0,
-      "fields" : []
+      "fields" : [
+        ["tmp", 64, false],
+        ["tmp_1", 96, false]
+      ]
+    },
+    {
+      "name" : "packet_in_header_t",
+      "id" : 1,
+      "fields" : [
+        ["zeros", 64, false],
+        ["ingress_port", 16, false],
+        ["type", 16, false]
+      ]
     },
     {
       "name" : "standard_metadata",
-      "id" : 1,
+      "id" : 2,
       "fields" : [
         ["ingress_port", 9, false],
         ["egress_spec", 9, false],
@@ -26,14 +38,6 @@
         ["parser_error", 32, false],
         ["priority", 3, false],
         ["_padding", 3, false]
-      ]
-    },
-    {
-      "name" : "packet_in_header_t",
-      "id" : 2,
-      "fields" : [
-        ["ingress_port", 16, false],
-        ["TYPE", 16, false]
       ]
     },
     {
@@ -66,36 +70,43 @@
   ],
   "headers" : [
     {
-      "name" : "scalars",
+      "name" : "tmp_0",
       "id" : 0,
+      "header_type" : "packet_in_header_t",
+      "metadata" : false,
+      "pi_omit" : true
+    },
+    {
+      "name" : "scalars",
+      "id" : 1,
       "header_type" : "scalars_0",
       "metadata" : true,
       "pi_omit" : true
     },
     {
       "name" : "standard_metadata",
-      "id" : 1,
+      "id" : 2,
       "header_type" : "standard_metadata",
       "metadata" : true,
       "pi_omit" : true
     },
     {
       "name" : "packet_in_header",
-      "id" : 2,
+      "id" : 3,
       "header_type" : "packet_in_header_t",
       "metadata" : false,
       "pi_omit" : true
     },
     {
       "name" : "ethernet",
-      "id" : 3,
+      "id" : 4,
       "header_type" : "ethernet_t",
       "metadata" : false,
       "pi_omit" : true
     },
     {
       "name" : "ipv4",
-      "id" : 4,
+      "id" : 5,
       "header_type" : "ipv4_t",
       "metadata" : false,
       "pi_omit" : true
@@ -125,6 +136,247 @@
         {
           "name" : "start",
           "id" : 0,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "field",
+                  "value" : ["scalars", "tmp_1"]
+                },
+                {
+                  "type" : "lookahead",
+                  "value" : [0, 96]
+                }
+              ],
+              "op" : "set"
+            },
+            {
+              "parameters" : [
+                {
+                  "parameters" : [
+                    {
+                      "type" : "header",
+                      "value" : "tmp_0"
+                    }
+                  ],
+                  "op" : "add_header"
+                }
+              ],
+              "op" : "primitive"
+            },
+            {
+              "parameters" : [
+                {
+                  "type" : "field",
+                  "value" : ["tmp_0", "zeros"]
+                },
+                {
+                  "type" : "expression",
+                  "value" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "tmp_1"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x20"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffffffffffffffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffffffffffffffff"
+                      }
+                    }
+                  }
+                }
+              ],
+              "op" : "set"
+            },
+            {
+              "parameters" : [
+                {
+                  "type" : "field",
+                  "value" : ["tmp_0", "ingress_port"]
+                },
+                {
+                  "type" : "expression",
+                  "value" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "tmp_1"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x10"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffffffffffffffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffff"
+                      }
+                    }
+                  }
+                }
+              ],
+              "op" : "set"
+            },
+            {
+              "parameters" : [
+                {
+                  "type" : "field",
+                  "value" : ["tmp_0", "type"]
+                },
+                {
+                  "type" : "expression",
+                  "value" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "field",
+                        "value" : ["scalars", "tmp_1"]
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffff"
+                      }
+                    }
+                  }
+                }
+              ],
+              "op" : "set"
+            },
+            {
+              "parameters" : [
+                {
+                  "type" : "field",
+                  "value" : ["scalars", "tmp"]
+                },
+                {
+                  "type" : "expression",
+                  "value" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "tmp_1"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x20"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffffffffffffffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffffffffffffffff"
+                      }
+                    }
+                  }
+                }
+              ],
+              "op" : "set"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "hexstr",
+              "value" : "0x0000000000000000",
+              "mask" : null,
+              "next_state" : "parse_packet_in_header"
+            },
+            {
+              "type" : "default",
+              "value" : null,
+              "mask" : null,
+              "next_state" : "parse_ethernet"
+            }
+          ],
+          "transition_key" : [
+            {
+              "type" : "field",
+              "value" : ["scalars", "tmp"]
+            }
+          ]
+        },
+        {
+          "name" : "parse_packet_in_header",
+          "id" : 1,
+          "parser_ops" : [
+            {
+              "parameters" : [
+                {
+                  "type" : "regular",
+                  "value" : "packet_in_header"
+                }
+              ],
+              "op" : "extract"
+            }
+          ],
+          "transitions" : [
+            {
+              "type" : "default",
+              "value" : null,
+              "mask" : null,
+              "next_state" : "parse_ethernet"
+            }
+          ],
+          "transition_key" : []
+        },
+        {
+          "name" : "parse_ethernet",
+          "id" : 2,
           "parser_ops" : [
             {
               "parameters" : [
@@ -159,7 +411,7 @@
         },
         {
           "name" : "parse_ipv4",
-          "id" : 1,
+          "id" : 3,
           "parser_ops" : [
             {
               "parameters" : [
@@ -191,7 +443,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "simple.p4",
-        "line" : 231,
+        "line" : 252,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
@@ -226,7 +478,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 144,
+            "line" : 157,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -252,7 +504,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 147,
+            "line" : 160,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = 64"
           }
@@ -267,7 +519,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 148,
+            "line" : 161,
             "column" : 8,
             "source_fragment" : "hdr.packet_in_header.setValid()"
           }
@@ -299,7 +551,80 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 149,
+            "line" : 162,
+            "column" : 8,
+            "source_fragment" : "hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "MyIngress.send_to_cpu",
+      "id" : 3,
+      "runtime_data" : [],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0040"
+            }
+          ],
+          "source_info" : {
+            "filename" : "simple.p4",
+            "line" : 160,
+            "column" : 8,
+            "source_fragment" : "standard_metadata.egress_spec = 64"
+          }
+        },
+        {
+          "op" : "add_header",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "packet_in_header"
+            }
+          ],
+          "source_info" : {
+            "filename" : "simple.p4",
+            "line" : 161,
+            "column" : 8,
+            "source_fragment" : "hdr.packet_in_header.setValid()"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["packet_in_header", "ingress_port"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["standard_metadata", "ingress_port"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "simple.p4",
+            "line" : 162,
             "column" : 8,
             "source_fragment" : "hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port"
           }
@@ -308,7 +633,7 @@
     },
     {
       "name" : "MyIngress.ipv4_forward",
-      "id" : 3,
+      "id" : 4,
       "runtime_data" : [
         {
           "name" : "port",
@@ -330,7 +655,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 156,
+            "line" : 174,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = port"
           }
@@ -339,7 +664,7 @@
     },
     {
       "name" : "MyIngress.flooding",
-      "id" : 4,
+      "id" : 5,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -356,7 +681,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 159,
+            "line" : 177,
             "column" : 8,
             "source_fragment" : "standard_metadata.mcast_grp = 1"
           }
@@ -370,18 +695,47 @@
       "id" : 0,
       "source_info" : {
         "filename" : "simple.p4",
-        "line" : 139,
+        "line" : 152,
         "column" : 8,
         "source_fragment" : "MyIngress"
       },
-      "init_table" : "MyIngress.ipv4_exact",
+      "init_table" : "node_2",
       "tables" : [
         {
-          "name" : "MyIngress.ipv4_exact",
+          "name" : "tbl_send_to_cpu",
           "id" : 0,
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 162,
+            "line" : 204,
+            "column" : 12,
+            "source_fragment" : "send_to_cpu()"
+          },
+          "key" : [],
+          "match_type" : "exact",
+          "type" : "simple",
+          "max_size" : 1024,
+          "with_counters" : false,
+          "support_timeout" : false,
+          "direct_meters" : null,
+          "action_ids" : [3],
+          "actions" : ["MyIngress.send_to_cpu"],
+          "base_default_next" : null,
+          "next_tables" : {
+            "MyIngress.send_to_cpu" : null
+          },
+          "default_entry" : {
+            "action_id" : 3,
+            "action_const" : true,
+            "action_data" : [],
+            "action_entry_const" : true
+          }
+        },
+        {
+          "name" : "MyIngress.ipv4_exact",
+          "id" : 1,
+          "source_info" : {
+            "filename" : "simple.p4",
+            "line" : 180,
             "column" : 10,
             "source_fragment" : "ipv4_exact"
           },
@@ -405,7 +759,7 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [3, 4, 2, 1, 0],
+          "action_ids" : [4, 5, 2, 1, 0],
           "actions" : ["MyIngress.ipv4_forward", "MyIngress.flooding", "MyIngress.send_to_cpu", "MyIngress.drop", "NoAction"],
           "base_default_next" : null,
           "next_tables" : {
@@ -424,14 +778,38 @@
         }
       ],
       "action_profiles" : [],
-      "conditionals" : []
+      "conditionals" : [
+        {
+          "name" : "node_2",
+          "id" : 0,
+          "source_info" : {
+            "filename" : "simple.p4",
+            "line" : 203,
+            "column" : 12,
+            "source_fragment" : "hdr.packet_in_header.isValid()"
+          },
+          "expression" : {
+            "type" : "expression",
+            "value" : {
+              "op" : "d2b",
+              "left" : null,
+              "right" : {
+                "type" : "field",
+                "value" : ["packet_in_header", "$valid$"]
+              }
+            }
+          },
+          "true_next" : "tbl_send_to_cpu",
+          "false_next" : "MyIngress.ipv4_exact"
+        }
+      ]
     },
     {
       "name" : "egress",
       "id" : 1,
       "source_info" : {
         "filename" : "simple.p4",
-        "line" : 197,
+        "line" : 218,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },

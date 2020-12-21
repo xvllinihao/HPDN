@@ -49,8 +49,8 @@ def main():
     num_hosts = int(args.num_hosts)
     result = os.system("p4c --target bmv2 --arch v1model --p4runtime-files firmeware.p4info.txt "+ args.p4_file)
     p4_file = args.p4_file.split('/')[-1]
-    # json_file = p4_file.split('.')[0] + ".json"
-    json_file = "/home/hpdn/Downloads/p4-researching-master/src/fundamental/learning-switch/basic_tutorial_switch.json"
+    json_file = p4_file.split('.')[0] + ".json"
+    # json_file = "/home/hpdn/Downloads/p4-researching-master/src/fundamental/learning-switch/basic_tutorial_switch.json"
 
     topo = SingleSwitchTopo("simple_switch_grpc",
                             json_file,

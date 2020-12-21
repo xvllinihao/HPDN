@@ -77,23 +77,5 @@ actions {
     alias: "flooding"
   }
 }
-controller_packet_metadata {
-  preamble {
-    id: 81826293
-    name: "packet_in"
-    alias: "packet_in"
-    annotations: "@controller_header(\"packet_in\")"
-  }
-  metadata {
-    id: 1
-    name: "ingress_port"
-    bitwidth: 16
-  }
-  metadata {
-    id: 2
-    name: "TYPE"
-    bitwidth: 16
-  }
-}
 type_info {
 }

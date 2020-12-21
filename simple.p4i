@@ -870,7 +870,8 @@ package V1Switch<H, M>(Parser<H, M> p,
 
 const bit<16> TYPE_IPV4 = 0x800;
 const bit<8> TYPE_TCP = 6;
-const bit<16> TYPE_LLDP = 5;
+const bit<16> TYPE_LLDP_IN = 5;
+const bit<16> TYPE_LLDP_OUT = 4;
 
 /*************************************************************************
 *********************** H E A D E R S  ***********************************
@@ -879,7 +880,6 @@ const bit<16> TYPE_LLDP = 5;
 typedef bit<9> egressSpec_t;
 typedef bit<48> macAddr_t;
 typedef bit<48> ip4Addr_t;
-
 
 
 header ethernet_t {
@@ -924,16 +924,18 @@ header tcp_t{
 }
 
 // packet in
-@controller_header("packet_in")
+//@controller_header("packet_in")
 header packet_in_header_t {
+    bit<64> zeros;
     bit<16> ingress_port;
-    bit<16> TYPE;
+    bit<16> type;
 }
 
 // packet out
 //@controller_header("packet_out")
 //header packet_out_header_t {
-//    bit<16> egress_port;
+    //bit<16> egress_port;
+    //bit<16> TYPE;
 //}
 
 struct metadata {
@@ -955,6 +957,7 @@ struct headers {
     //packet_out_header_t packet_out_header;
     ethernet_t ethernet;
     ipv4_t ipv4;
+
     //tcp_t        tcp;
 }
 
@@ -970,6 +973,16 @@ parser MyParser(packet_in packet,
                 inout standard_metadata_t standard_metadata) {
 
     state start {
+        transition select(packet.lookahead<packet_in_header_t>().zeros){
+            (bit<64>)0 : parse_packet_in_header;
+            //CPU_PORT: parse_packet_out;
+            default: parse_ethernet;
+        }
+        //packet.extract(hdr.packet_out_header);
+        //transition parse_ethernet;
+    }
+    state parse_packet_in_header {
+        packet.extract(hdr.packet_in_header);
         transition parse_ethernet;
     }
 
@@ -1012,12 +1025,17 @@ control MyIngress(inout headers hdr,
         standard_metadata.egress_spec = 64;
         hdr.packet_in_header.setValid();
         hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port;
+
         //meta.ingress_port = (bit<16>)standard_metadata.ingress_port;
         //meta.ingress_port = (bit<32>)standard_metadata.ingress_port;
         //hdr.ipv4.setValid();
         //hdr.ipv4.ingress_port = (bit<16>)standard_metadata.ingress_port;
     }
     action ipv4_forward(egressSpec_t port) {
+        //if (hdr.packet_out_header.TYPE == TYPE_LLDP) {
+            //hdr.packet_in_header.TYPE = TYPE_LLDP;
+            //hdr.packet_in_header.ingress_port = hdr.packet_out_header.egress_port;
+        //}
         standard_metadata.egress_spec = port;
     }
     action flooding() {
@@ -1044,12 +1062,15 @@ control MyIngress(inout headers hdr,
 
     apply {
         //if (hdr.ipv4.isValid()) {
-        //if (hdr.packet_in_header.TYPE == TYPE_LLDP){
-            //send_to_cpu();
+        //if (hdr.packet_out_header.isValid()){
+            //ipv4_forward();
         //}
-        //else{
+        if (hdr.packet_in_header.isValid()) {
+            send_to_cpu();
+        }
+        else{
             ipv4_exact.apply();
-        //}
+        }
        // }
 
     }

@@ -32,34 +32,34 @@ class LLDP_Thread(Thread):
         pkt = Ether(src='00:00:00:00:00:00', dst="ff:ff:ff:ff:ff:ff")
         lldp_chassis_id = lldp.LLDPDUChassisID(id=str.encode(self.sw.name))
         lldp_port_id = lldp.LLDPDUPortID(id=struct.pack(">H", port))
-        lldp_time_to_live = lldp.LLDPDUTimeToLive(ttl=6)
+        lldp_time_to_live = lldp.LLDPDUTimeToLive(ttl=1)
         lldp_end_of_lldp = lldp.LLDPDUEndOfLLDPDU()
 
         pkt = pkt / lldp_chassis_id / lldp_port_id / lldp_time_to_live / lldp_end_of_lldp
 
-        ingress_port = struct.pack("<H", 0)
-        type = struct.pack("<H", 5)
-        header = ingress_port + type
+        zeros = struct.pack(">q", 0)
+        ingress_port = struct.pack(">H", port)
+        type = struct.pack(">H", 5)
+        header = zeros + ingress_port + type
 
         print "sending LLDP packet on port" + str(port)
-        return (str(pkt))
+        return (header + str(pkt))
 
     def run(self):
-        # while True:
-        #     sleep(2)
-            for i in range(64,65):
-                packet_out = p4runtime_pb2.PacketOut()
-                packet_out.payload = self.generate_lldp_packet(i)
-                # del packet_out.metadata[:]
-                p4runtime_metadata1 = p4runtime_pb2.PacketMetadata()
-                p4runtime_metadata1.metadata_id = 1
-                p4runtime_metadata1.value = "1"
-                p4runtime_metadata2 = p4runtime_pb2.PacketMetadata()
-                p4runtime_metadata2.metadata_id = 2
-                p4runtime_metadata2.value = "2"
-                packet_out.metadata.extend([p4runtime_metadata1])
-                packet_out.metadata.extend([p4runtime_metadata2])
-                self.sw.PacketOut(packet_out)
+        for i in range(1, 6):
+            packet_out = p4runtime_pb2.PacketOut()
+            packet_out.payload = self.generate_lldp_packet(i)
+            # del packet_out.metadata[:]
+            # p4runtime_metadata1 = p4runtime_pb2.PacketMetadata()
+            # p4runtime_metadata1.metadata_id = 1
+            # p4runtime_metadata1.value = struct.pack(">H", i)
+            # packet_out.metadata.append(p4runtime_metadata1)
+            # p4runtime_metadata2 = p4runtime_pb2.PacketMetadata()
+            # p4runtime_metadata2.metadata_id = 2
+            # p4runtime_metadata2.value = struct.pack(">H", 5)
+            # packet_out.metadata.append(p4runtime_metadata2)
+            self.sw.PacketOut(packet_out)
+            print 'receive'
 
 
 def writeIpv4Rules(p4info_helper, sw_id, src_ip_addr, dst_ip_addr, port):
@@ -201,47 +201,59 @@ def main(p4info_file_path, bmv2_file_path):
         readTableRules(p4info_helper, s1)
 
         lldp_thread = LLDP_Thread(s1)
-        lldp_thread.run()
+        # lldp_thread.run()
         # lldp_thread.start()
-
-
+        # counter = 0
 
         while True:
             packetin = s1.PacketIn()
+            # counter += 1
             payload = packetin.packet.payload
-            pkt = Ether(_pkt=payload)
-            metadata = packetin.packet.metadata[0]
-            metadata_id = metadata.metadata_id
-            port = metadata.value
-            pkt_type = packetin.packet.metadata[1].value
+            pkt = Ether(_pkt=payload[12:])
+            # metadata = packetin.packet.metadata[0]
+            # metadata_id = metadata.metadata_id
+            # port = metadata.value
+            # pkt_type = packetin.packet.metadata[1].value
+            zeros = struct.unpack(">q", payload[:8])[0]
+            port = struct.unpack(">H", payload[8:10])[0]
+            type = struct.unpack(">H", payload[10:12])[0]
 
-            pkt_eth_src = pkt.getlayer(Ether).src
-            pkt_eth_dst = pkt.getlayer(Ether).dst
-            ether_type = pkt.getlayer(Ether).type
+            if zeros == 0:
+                pkt_eth_src = pkt.getlayer(Ether).src
+                pkt_eth_dst = pkt.getlayer(Ether).dst
+                ether_type = pkt.getlayer(Ether).type
 
-            # if pkt_eth_src in mac_to_port[s1.name]:
-            #     writeIpv4Rules(p4info_helper,s1,pkt_eth_src,mac_to_port[s1.name][pkt_eth_src])
+                # self send lldp
+                if type == 5:
+                    pass
+                elif type == 4:
+                    pass
+                else:
+                    lldp_thread.run()
+                    # if pkt_eth_src in mac_to_port[s1.name]:
+                    #     writeIpv4Rules(p4info_helper,s1,pkt_eth_src,mac_to_port[s1.name][pkt_eth_src])
 
-            # if ether_type == 2048 or ether_type == 2054:
-            # writeIpv4Rules(p4info_helper, s1, pkt_eth_src, port)
+                    # if ether_type == 2048 or ether_type == 2054:
+                    # writeIpv4Rules(p4info_helper, s1, pkt_eth_src, port)
 
-            mac_to_port[s1.name][pkt_eth_src] = port
-            if pkt_eth_dst not in mac_to_port[s1.name]:
-                writeFloodingRules(p4info_helper, s1, pkt_eth_src, pkt_eth_dst)
+                    mac_to_port[s1.name][pkt_eth_src] = port
+                    if pkt_eth_dst not in mac_to_port[s1.name]:
+                        writeFloodingRules(p4info_helper, s1, pkt_eth_src, pkt_eth_dst)
+                    else:
+                        writeIpv4Rules(p4info_helper, s1, pkt_eth_src, pkt_eth_dst, mac_to_port[s1.name][pkt_eth_dst])
+                        writeIpv4Rules(p4info_helper, s1, pkt_eth_dst, pkt_eth_src, mac_to_port[s1.name][pkt_eth_src])
+                    readTableRules(p4info_helper, s1)
+
+                    packet_out = p4runtime_pb2.PacketOut()
+                    packet_out.payload = payload[12:]
+                    # def packet_Out(s1,packetout):
+                    #     s1.PacketOut(packetout)
+                    # thread.start_new_thread(packet_Out,(s1,packet_out))
+                    # packet_out.metadata = metadata
+                    s1.PacketOut(packet_out)
+                    # if counter % 10 == 0:
             else:
-                writeIpv4Rules(p4info_helper, s1, pkt_eth_src, pkt_eth_dst, mac_to_port[s1.name][pkt_eth_dst])
-                writeIpv4Rules(p4info_helper, s1, pkt_eth_dst, pkt_eth_src, mac_to_port[s1.name][pkt_eth_src])
-            readTableRules(p4info_helper, s1)
-
-
-            packet_out = p4runtime_pb2.PacketOut()
-            packet_out.payload = payload
-            # def packet_Out(s1,packetout):
-            #     s1.PacketOut(packetout)
-            # thread.start_new_thread(packet_Out,(s1,packet_out))
-            # packet_out.metadata = metadata
-            s1.PacketOut(packet_out)
-
+                pass
 
     except KeyboardInterrupt:
         print " Shutting down."
