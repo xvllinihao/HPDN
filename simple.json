@@ -5,7 +5,7 @@
       "id" : 0,
       "fields" : [
         ["tmp", 64, false],
-        ["tmp_1", 96, false]
+        ["tmp_1", 192, false]
       ]
     },
     {
@@ -14,7 +14,10 @@
       "fields" : [
         ["zeros", 64, false],
         ["ingress_port", 16, false],
-        ["type", 16, false]
+        ["type", 16, false],
+        ["timestamp", 64, false],
+        ["switch_id", 16, false],
+        ["src_port", 16, false]
       ]
     },
     {
@@ -145,7 +148,7 @@
                 },
                 {
                   "type" : "lookahead",
-                  "value" : [0, 96]
+                  "value" : [0, 192]
                 }
               ],
               "op" : "set"
@@ -190,13 +193,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x20"
+                                "value" : "0x80"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -236,13 +239,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x10"
+                                "value" : "0x70"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -261,6 +264,144 @@
                 {
                   "type" : "field",
                   "value" : ["tmp_0", "type"]
+                },
+                {
+                  "type" : "expression",
+                  "value" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "tmp_1"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x60"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffff"
+                      }
+                    }
+                  }
+                }
+              ],
+              "op" : "set"
+            },
+            {
+              "parameters" : [
+                {
+                  "type" : "field",
+                  "value" : ["tmp_0", "timestamp"]
+                },
+                {
+                  "type" : "expression",
+                  "value" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "tmp_1"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x20"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffffffffffffffff"
+                      }
+                    }
+                  }
+                }
+              ],
+              "op" : "set"
+            },
+            {
+              "parameters" : [
+                {
+                  "type" : "field",
+                  "value" : ["tmp_0", "switch_id"]
+                },
+                {
+                  "type" : "expression",
+                  "value" : {
+                    "type" : "expression",
+                    "value" : {
+                      "op" : "&",
+                      "left" : {
+                        "type" : "expression",
+                        "value" : {
+                          "op" : "&",
+                          "left" : {
+                            "type" : "expression",
+                            "value" : {
+                              "op" : ">>",
+                              "left" : {
+                                "type" : "field",
+                                "value" : ["scalars", "tmp_1"]
+                              },
+                              "right" : {
+                                "type" : "hexstr",
+                                "value" : "0x10"
+                              }
+                            }
+                          },
+                          "right" : {
+                            "type" : "hexstr",
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffff"
+                          }
+                        }
+                      },
+                      "right" : {
+                        "type" : "hexstr",
+                        "value" : "0xffff"
+                      }
+                    }
+                  }
+                }
+              ],
+              "op" : "set"
+            },
+            {
+              "parameters" : [
+                {
+                  "type" : "field",
+                  "value" : ["tmp_0", "src_port"]
                 },
                 {
                   "type" : "expression",
@@ -308,13 +449,13 @@
                               },
                               "right" : {
                                 "type" : "hexstr",
-                                "value" : "0x20"
+                                "value" : "0x80"
                               }
                             }
                           },
                           "right" : {
                             "type" : "hexstr",
-                            "value" : "0xffffffffffffffffffffffff"
+                            "value" : "0xffffffffffffffffffffffffffffffffffffffffffffffff"
                           }
                         }
                       },
@@ -443,7 +584,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "simple.p4",
-        "line" : 252,
+        "line" : 267,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
@@ -478,7 +619,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 157,
+            "line" : 160,
             "column" : 8,
             "source_fragment" : "mark_to_drop(standard_metadata)"
           }
@@ -504,7 +645,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 160,
+            "line" : 163,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = 64"
           }
@@ -519,9 +660,28 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 161,
+            "line" : 164,
             "column" : 8,
             "source_fragment" : "hdr.packet_in_header.setValid()"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["packet_in_header", "zeros"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0000000000000000"
+            }
+          ],
+          "source_info" : {
+            "filename" : "simple.p4",
+            "line" : 165,
+            "column" : 8,
+            "source_fragment" : "hdr.packet_in_header.zeros = (bit<64>)0"
           }
         },
         {
@@ -551,7 +711,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 162,
+            "line" : 166,
             "column" : 8,
             "source_fragment" : "hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port"
           }
@@ -577,7 +737,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 160,
+            "line" : 163,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = 64"
           }
@@ -592,9 +752,28 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 161,
+            "line" : 164,
             "column" : 8,
             "source_fragment" : "hdr.packet_in_header.setValid()"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["packet_in_header", "zeros"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0000000000000000"
+            }
+          ],
+          "source_info" : {
+            "filename" : "simple.p4",
+            "line" : 165,
+            "column" : 8,
+            "source_fragment" : "hdr.packet_in_header.zeros = (bit<64>)0"
           }
         },
         {
@@ -624,7 +803,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 162,
+            "line" : 166,
             "column" : 8,
             "source_fragment" : "hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port"
           }
@@ -655,7 +834,104 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 174,
+            "line" : 177,
+            "column" : 8,
+            "source_fragment" : "standard_metadata.egress_spec = port"
+          }
+        },
+        {
+          "op" : "add_header",
+          "parameters" : [
+            {
+              "type" : "header",
+              "value" : "packet_in_header"
+            }
+          ],
+          "source_info" : {
+            "filename" : "simple.p4",
+            "line" : 178,
+            "column" : 8,
+            "source_fragment" : "hdr.packet_in_header.setValid()"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["packet_in_header", "zeros"]
+            },
+            {
+              "type" : "hexstr",
+              "value" : "0x0000000000000000"
+            }
+          ],
+          "source_info" : {
+            "filename" : "simple.p4",
+            "line" : 179,
+            "column" : 8,
+            "source_fragment" : "hdr.packet_in_header.zeros = (bit<64>)0"
+          }
+        },
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["packet_in_header", "ingress_port"]
+            },
+            {
+              "type" : "expression",
+              "value" : {
+                "type" : "expression",
+                "value" : {
+                  "op" : "&",
+                  "left" : {
+                    "type" : "field",
+                    "value" : ["standard_metadata", "ingress_port"]
+                  },
+                  "right" : {
+                    "type" : "hexstr",
+                    "value" : "0xffff"
+                  }
+                }
+              }
+            }
+          ],
+          "source_info" : {
+            "filename" : "simple.p4",
+            "line" : 180,
+            "column" : 8,
+            "source_fragment" : "hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port"
+          }
+        }
+      ]
+    },
+    {
+      "name" : "MyIngress.ipv4_force_forward",
+      "id" : 5,
+      "runtime_data" : [
+        {
+          "name" : "port",
+          "bitwidth" : 9
+        }
+      ],
+      "primitives" : [
+        {
+          "op" : "assign",
+          "parameters" : [
+            {
+              "type" : "field",
+              "value" : ["standard_metadata", "egress_spec"]
+            },
+            {
+              "type" : "runtime_data",
+              "value" : 0
+            }
+          ],
+          "source_info" : {
+            "filename" : "simple.p4",
+            "line" : 183,
             "column" : 8,
             "source_fragment" : "standard_metadata.egress_spec = port"
           }
@@ -664,7 +940,7 @@
     },
     {
       "name" : "MyIngress.flooding",
-      "id" : 5,
+      "id" : 6,
       "runtime_data" : [],
       "primitives" : [
         {
@@ -681,7 +957,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 177,
+            "line" : 187,
             "column" : 8,
             "source_fragment" : "standard_metadata.mcast_grp = 1"
           }
@@ -695,7 +971,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "simple.p4",
-        "line" : 152,
+        "line" : 155,
         "column" : 8,
         "source_fragment" : "MyIngress"
       },
@@ -706,7 +982,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 204,
+            "line" : 215,
             "column" : 12,
             "source_fragment" : "send_to_cpu()"
           },
@@ -735,7 +1011,7 @@
           "id" : 1,
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 180,
+            "line" : 190,
             "column" : 10,
             "source_fragment" : "ipv4_exact"
           },
@@ -759,15 +1035,16 @@
           "with_counters" : false,
           "support_timeout" : false,
           "direct_meters" : null,
-          "action_ids" : [4, 5, 2, 1, 0],
-          "actions" : ["MyIngress.ipv4_forward", "MyIngress.flooding", "MyIngress.send_to_cpu", "MyIngress.drop", "NoAction"],
+          "action_ids" : [4, 6, 2, 1, 0, 5],
+          "actions" : ["MyIngress.ipv4_forward", "MyIngress.flooding", "MyIngress.send_to_cpu", "MyIngress.drop", "NoAction", "MyIngress.ipv4_force_forward"],
           "base_default_next" : null,
           "next_tables" : {
             "MyIngress.ipv4_forward" : null,
             "MyIngress.flooding" : null,
             "MyIngress.send_to_cpu" : null,
             "MyIngress.drop" : null,
-            "NoAction" : null
+            "NoAction" : null,
+            "MyIngress.ipv4_force_forward" : null
           },
           "default_entry" : {
             "action_id" : 2,
@@ -784,7 +1061,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 203,
+            "line" : 214,
             "column" : 12,
             "source_fragment" : "hdr.packet_in_header.isValid()"
           },
@@ -809,7 +1086,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "simple.p4",
-        "line" : 218,
+        "line" : 229,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },

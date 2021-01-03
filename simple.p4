@@ -64,6 +64,9 @@ header packet_in_header_t {
     bit<64>  zeros;
     bit<16>  ingress_port;
     bit<16>  type;
+    bit<64>  timestamp;
+    bit<16>  switch_id;
+    bit<16>  src_port;
 }
 
 // packet out
@@ -159,8 +162,8 @@ control MyIngress(inout headers hdr,
     action send_to_cpu() {
         standard_metadata.egress_spec = CPU_PORT;
         hdr.packet_in_header.setValid();
-        hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port;
-
+        hdr.packet_in_header.zeros = (bit<64>)0;
+        hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress _port;
         //meta.ingress_port = (bit<16>)standard_metadata.ingress_port;
         //meta.ingress_port = (bit<32>)standard_metadata.ingress_port;
         //hdr.ipv4.setValid();
@@ -172,6 +175,13 @@ control MyIngress(inout headers hdr,
             //hdr.packet_in_header.ingress_port = hdr.packet_out_header.egress_port;
         //}
         standard_metadata.egress_spec = port;
+        hdr.packet_in_header.setValid();
+        hdr.packet_in_header.zeros = (bit<64>)0;
+        hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port;
+    }
+    action ipv4_force_forward(egressSpec_t port) {
+        standard_metadata.egress_spec = port;
+        //standard_metadata.egress_port = (bit<9>)hdr.packet_in_header.src_port;
     }
     action flooding() {
         standard_metadata.mcast_grp = 1;
@@ -188,6 +198,7 @@ control MyIngress(inout headers hdr,
             send_to_cpu;
             drop;
             NoAction;
+            ipv4_force_forward;
         }
         size = 1024;
         //default_action = drop();
@@ -197,7 +208,7 @@ control MyIngress(inout headers hdr,
     
     apply {
         //if (hdr.ipv4.isValid()) {
-        //if (hdr.packet_out_header.isValid()){
+        //if (hdr.packet_in_header.isValid()){
             //ipv4_forward();
         //}
         if (hdr.packet_in_header.isValid()) {
@@ -218,7 +229,11 @@ control MyIngress(inout headers hdr,
 control MyEgress(inout headers hdr,
                  inout metadata meta,
                  inout standard_metadata_t standard_metadata) {
-    apply {  }
+    apply {
+        //if (standard_metadata.egress_spec == CPU_PORT && hdr.packet_in_header.isValid()) {
+        //    hdr.packet_in_header.type = 5;
+        //}
+    }
 }
 
 /*************************************************************************

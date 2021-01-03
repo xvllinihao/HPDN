@@ -1,0 +1,83 @@
+[00:26:07.808] [bmv2] [D] [thread 7539] Set default default entry for table 'tbl_send_to_cpu': MyIngress.send_to_cpu - 
+[00:26:07.808] [bmv2] [D] [thread 7539] Set default default entry for table 'MyIngress.ipv4_exact': MyIngress.send_to_cpu - 
+[00:26:07.808] [bmv2] [D] [thread 7539] Adding interface s2-eth1 as port 1
+[00:26:07.827] [bmv2] [D] [thread 7539] Adding interface s2-eth2 as port 2
+[00:26:11.648] [bmv2] [W] [thread 7680] [P4Runtime] p4::tmp::P4DeviceConfig is deprecated
+[00:26:11.649] [bmv2] [D] [thread 7680] Set default default entry for table 'tbl_send_to_cpu': MyIngress.send_to_cpu - 
+[00:26:11.649] [bmv2] [D] [thread 7680] Set default default entry for table 'MyIngress.ipv4_exact': MyIngress.send_to_cpu - 
+[00:26:11.651] [bmv2] [D] [thread 7680] simple_switch target has been notified of a config swap
+[00:26:11.652] [bmv2] [D] [thread 7688] mgrp node created for mgid 1
+[00:26:11.652] [bmv2] [D] [thread 7688] node created for rid 5
+[00:26:11.652] [bmv2] [D] [thread 7688] node associated with mgid 1
+[00:26:11.652] [bmv2] [D] [thread 7688] node created for rid 4
+[00:26:11.652] [bmv2] [D] [thread 7688] node associated with mgid 1
+[00:26:11.652] [bmv2] [D] [thread 7688] node created for rid 3
+[00:26:11.652] [bmv2] [D] [thread 7688] node associated with mgid 1
+[00:26:11.652] [bmv2] [D] [thread 7688] node created for rid 1
+[00:26:11.652] [bmv2] [D] [thread 7688] node associated with mgid 1
+[00:26:11.652] [bmv2] [D] [thread 7688] node created for rid 2
+[00:26:11.652] [bmv2] [D] [thread 7688] node associated with mgid 1
+[00:26:55.403] [bmv2] [D] [thread 8012] Set default default entry for table 'tbl_send_to_cpu': MyIngress.send_to_cpu - 
+[00:26:55.403] [bmv2] [D] [thread 8012] Set default default entry for table 'MyIngress.ipv4_exact': MyIngress.send_to_cpu - 
+[00:26:55.403] [bmv2] [D] [thread 8012] Adding interface s2-eth1 as port 1
+[00:26:55.443] [bmv2] [D] [thread 8012] Adding interface s2-eth2 as port 2
+[00:26:59.128] [bmv2] [W] [thread 8143] [P4Runtime] p4::tmp::P4DeviceConfig is deprecated
+[00:26:59.129] [bmv2] [D] [thread 8143] Set default default entry for table 'tbl_send_to_cpu': MyIngress.send_to_cpu - 
+[00:26:59.129] [bmv2] [D] [thread 8143] Set default default entry for table 'MyIngress.ipv4_exact': MyIngress.send_to_cpu - 
+[00:26:59.130] [bmv2] [D] [thread 8143] simple_switch target has been notified of a config swap
+[00:26:59.131] [bmv2] [D] [thread 8143] mgrp node created for mgid 1
+[00:26:59.131] [bmv2] [D] [thread 8143] node created for rid 5
+[00:26:59.131] [bmv2] [D] [thread 8143] node associated with mgid 1
+[00:26:59.131] [bmv2] [D] [thread 8143] node created for rid 4
+[00:26:59.131] [bmv2] [D] [thread 8143] node associated with mgid 1
+[00:26:59.131] [bmv2] [D] [thread 8143] node created for rid 3
+[00:26:59.131] [bmv2] [D] [thread 8143] node associated with mgid 1
+[00:26:59.131] [bmv2] [D] [thread 8143] node created for rid 1
+[00:26:59.131] [bmv2] [D] [thread 8143] node associated with mgid 1
+[00:26:59.131] [bmv2] [D] [thread 8143] node created for rid 2
+[00:26:59.131] [bmv2] [D] [thread 8143] node associated with mgid 1
+[00:27:24.174] [bmv2] [D] [thread 8470] Set default default entry for table 'tbl_send_to_cpu': MyIngress.send_to_cpu - 
+[00:27:24.174] [bmv2] [D] [thread 8470] Set default default entry for table 'MyIngress.ipv4_exact': MyIngress.send_to_cpu - 
+[00:27:24.174] [bmv2] [D] [thread 8470] Adding interface s2-eth1 as port 1
+[00:27:24.331] [bmv2] [D] [thread 8470] Adding interface s2-eth2 as port 2
+[00:27:27.887] [bmv2] [W] [thread 8607] [P4Runtime] p4::tmp::P4DeviceConfig is deprecated
+[00:27:27.888] [bmv2] [D] [thread 8607] Set default default entry for table 'tbl_send_to_cpu': MyIngress.send_to_cpu - 
+[00:27:27.888] [bmv2] [D] [thread 8607] Set default default entry for table 'MyIngress.ipv4_exact': MyIngress.send_to_cpu - 
+[00:27:27.888] [bmv2] [D] [thread 8607] simple_switch target has been notified of a config swap
+[00:27:27.890] [bmv2] [D] [thread 8614] mgrp node created for mgid 1
+[00:27:27.890] [bmv2] [D] [thread 8614] node created for rid 5
+[00:27:27.890] [bmv2] [D] [thread 8614] node associated with mgid 1
+[00:27:27.890] [bmv2] [D] [thread 8614] node created for rid 4
+[00:27:27.890] [bmv2] [D] [thread 8614] node associated with mgid 1
+[00:27:27.890] [bmv2] [D] [thread 8614] node created for rid 3
+[00:27:27.890] [bmv2] [D] [thread 8614] node associated with mgid 1
+[00:27:27.890] [bmv2] [D] [thread 8614] node created for rid 1
+[00:27:27.890] [bmv2] [D] [thread 8614] node associated with mgid 1
+[00:27:27.890] [bmv2] [D] [thread 8614] node created for rid 2
+[00:27:27.890] [bmv2] [D] [thread 8614] node associated with mgid 1
+[00:28:25.217] [bmv2] [D] [thread 8944] Set default default entry for table 'tbl_send_to_cpu': MyIngress.send_to_cpu - 
+[00:28:25.217] [bmv2] [D] [thread 8944] Set default default entry for table 'MyIngress.ipv4_exact': MyIngress.send_to_cpu - 
+[00:28:25.218] [bmv2] [D] [thread 8944] Adding interface s2-eth1 as port 1
+[00:28:25.264] [bmv2] [D] [thread 8944] Adding interface s2-eth2 as port 2
+[00:28:30.473] [bmv2] [W] [thread 9082] [P4Runtime] p4::tmp::P4DeviceConfig is deprecated
+[00:28:30.474] [bmv2] [D] [thread 9082] Set default default entry for table 'tbl_send_to_cpu': MyIngress.send_to_cpu - 
+[00:28:30.474] [bmv2] [D] [thread 9082] Set default default entry for table 'MyIngress.ipv4_exact': MyIngress.send_to_cpu - 
+[00:28:30.474] [bmv2] [D] [thread 9082] simple_switch target has been notified of a config swap
+[00:28:30.478] [bmv2] [D] [thread 9090] mgrp node created for mgid 1
+[00:28:30.478] [bmv2] [D] [thread 9090] node created for rid 5
+[00:28:30.478] [bmv2] [D] [thread 9090] node associated with mgid 1
+[00:28:30.478] [bmv2] [D] [thread 9090] node created for rid 4
+[00:28:30.478] [bmv2] [D] [thread 9090] node associated with mgid 1
+[00:28:30.478] [bmv2] [D] [thread 9090] node created for rid 3
+[00:28:30.478] [bmv2] [D] [thread 9090] node associated with mgid 1
+[00:28:30.478] [bmv2] [D] [thread 9090] node created for rid 1
+[00:28:30.478] [bmv2] [D] [thread 9090] node associated with mgid 1
+[00:28:30.478] [bmv2] [D] [thread 9090] node created for rid 2
+[00:28:30.478] [bmv2] [D] [thread 9090] node associated with mgid 1
+[00:28:30.480] [bmv2] [D] [thread 9082] Entry 0 added to table 'MyIngress.ipv4_exact'
+[00:28:30.480] [bmv2] [D] [thread 9082] Dumping entry 0
+Match key:
+* hdr.ethernet.srcAddr: EXACT     000000000000
+* hdr.ethernet.dstAddr: EXACT     ffffffffffff
+Action entry: MyIngress.ipv4_force_forward - 3,
+

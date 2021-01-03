@@ -1,8 +1,11 @@
+import math
+
 import networkx as nx
 import matplotlib.pyplot as plt
 
-G = nx.Graph()
-G = nx.cycle_graph(3)
+import uuid, struct
+import time, datetime
 
-nx.draw(G, with_labels=True)
-plt.show()
+t = time.mktime(datetime.datetime.now().timetuple())
+print math.log(t,2)
+print len(struct.pack(">q", t))

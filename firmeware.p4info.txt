@@ -34,6 +34,9 @@ tables {
   action_refs {
     id: 21257015
   }
+  action_refs {
+    id: 27384978
+  }
   size: 1024
 }
 actions {
@@ -63,6 +66,18 @@ actions {
     id: 28792405
     name: "MyIngress.ipv4_forward"
     alias: "ipv4_forward"
+  }
+  params {
+    id: 1
+    name: "port"
+    bitwidth: 9
+  }
+}
+actions {
+  preamble {
+    id: 27384978
+    name: "MyIngress.ipv4_force_forward"
+    alias: "ipv4_force_forward"
   }
   params {
     id: 1
