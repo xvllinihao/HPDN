@@ -1040,9 +1040,9 @@ control MyIngress(inout headers hdr,
             //hdr.packet_in_header.ingress_port = hdr.packet_out_header.egress_port;
         //}
         standard_metadata.egress_spec = port;
-        hdr.packet_in_header.setValid();
-        hdr.packet_in_header.zeros = (bit<64>)0;
-        hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port;
+        //hdr.packet_in_header.setValid();
+        //hdr.packet_in_header.zeros = (bit<64>)0;
+        //hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port;
     }
     action ipv4_force_forward(egressSpec_t port) {
         standard_metadata.egress_spec = port;

@@ -28,7 +28,8 @@ from utils import helper, bmv2, convert
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'utils/'))
 from utils.switch import ShutdownAllSwitchConnections
 
-
+CPU_PORT = 64
+TYPE_PROBE = 5
 
 class LLDP_Sender(object):
     def __init__(self, switch):
@@ -235,9 +236,8 @@ class Controller(object):
                     # self.net.add_node(pkt_eth_src)
                     # self.net.add_node(pkt_eth_dst)
 
-
                     # self send lldp
-                    if type == 5:
+                    if type == TYPE_PROBE:
                         # try:
                             if timestamp not in self.timestamp_set:
                                 self.timestamp_set.add(timestamp)
@@ -272,25 +272,28 @@ class Controller(object):
 
                         # if ether_type == 2048 or ether_type == 2054:
                         # writeIpv4Rules(p4info_helper, s1, pkt_eth_src, port)
+                        if in_port == CPU_PORT:
+                            continue
                         self.mac_to_port[switch.name][pkt_eth_src] = in_port
+                        print switch.name, pkt_eth_src, "in_port", in_port
                         if pkt_eth_dst not in self.mac_to_port[switch.name]:
                             self.writeFloodingRules(p4info_helper, switch, pkt_eth_src, pkt_eth_dst)
-                            self.readTableRules(p4info_helper, switch)
+                            # self.readTableRules(p4info_helper, switch)
 
-                            for i in range(1, 7):
-                                zeros = struct.pack(">q", 0)
-                                ingress_port = struct.pack(">H", 0)
-                                type = struct.pack(">H", 0)
-                                timestamp = time.mktime(datetime.datetime.now().timetuple())
-                                timestamp = struct.pack(">q", timestamp)
-                                switch_id = struct.pack(">H", int(switch.name[1:]))
-                                src_port = struct.pack(">H", int(i))
+                            # for i in range(1, 7):
+                            #     zeros = struct.pack(">q", 0)
+                            #     ingress_port = struct.pack(">H", 0)
+                            #     type = struct.pack(">H", 0)
+                            #     timestamp = time.mktime(datetime.datetime.now().timetuple())
+                            #     timestamp = struct.pack(">q", timestamp)
+                            #     switch_id = struct.pack(">H", int(switch.name[1:]))
+                            #     src_port = struct.pack(">H", int(i))
+                            #
+                            #     header = zeros + ingress_port + type + timestamp + switch_id + src_port
+                            #     packet_out = p4runtime_pb2.PacketOut()
+                            #     packet_out.payload = header + payload[24:]
+                            #     switch.PacketOut(packet_out)
 
-                                header = zeros + ingress_port + type + timestamp + switch_id + src_port
-                                packet_out = p4runtime_pb2.PacketOut()
-                                packet_out.payload = header + payload[24:]
-                                switch.PacketOut(packet_out)
-                                print 'send arp force forward'
                         else:
                             src_port = self.mac_to_port[switch.name][pkt_eth_dst]
                             print 'src_port', src_port
@@ -301,7 +304,7 @@ class Controller(object):
                             self.writeIpv4Rules(p4info_helper, switch, pkt_eth_src, pkt_eth_dst, self.mac_to_port[switch.name][pkt_eth_dst])
                             self.writeIpv4Rules(p4info_helper, switch, pkt_eth_dst, pkt_eth_src, self.mac_to_port[switch.name][pkt_eth_src])
 
-                            print 'mac_to_port', self.mac_to_port
+                            print switch.name, 'mac_to_port', self.mac_to_port
 
                             self.net.add_edge(pkt_eth_src, switch.name, src_port=src_port, dst_port=dst_port)
                             self.net.add_edge(switch.name, pkt_eth_src, src_port=dst_port, dst_port=src_port)
