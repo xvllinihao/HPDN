@@ -163,7 +163,7 @@ control MyIngress(inout headers hdr,
         standard_metadata.egress_spec = CPU_PORT;
         hdr.packet_in_header.setValid();
         hdr.packet_in_header.zeros = (bit<64>)0;
-        hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress _port;
+        hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port;
         //meta.ingress_port = (bit<16>)standard_metadata.ingress_port;
         //meta.ingress_port = (bit<32>)standard_metadata.ingress_port;
         //hdr.ipv4.setValid();

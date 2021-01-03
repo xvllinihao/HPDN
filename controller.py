@@ -129,25 +129,25 @@ class Controller(object):
                 "hdr.ethernet.srcAddr": src_ip_addr,
                 "hdr.ethernet.dstAddr": dst_ip_addr
             },
-            action_name="MyIngress.ipv4_force_forward",
+            action_name="MyIngress.flooding",
             action_params={
             })
         sw_id.WriteTableEntry(table_entry)
         print "Installed ingress flooding rule on %s" % sw_id.name
 
 
-    # def writeBroadcastRules(self, p4info_helper, sw_id):
-    #     table_entry = p4info_helper.buildTableEntry(
-    #         table_name="MyIngress.ipv4_exact",
-    #         match_fields={
-    #             "hdr.ethernet.srcAddr": "00:00:00:00:00:00",
-    #             "hdr.ethernet.dstAddr": "ff:ff:ff:ff:ff:ff"
-    #         },
-    #         action_name="MyIngress.flooding",
-    #         action_params={
-    #         })
-    #     sw_id.WriteTableEntry(table_entry)
-    #     print "Installed broadcast rule on %s" % sw_id.name
+    def writeBroadcastRules(self, p4info_helper, sw_id):
+        table_entry = p4info_helper.buildTableEntry(
+            table_name="MyIngress.ipv4_exact",
+            match_fields={
+                "hdr.ethernet.srcAddr": "00:00:00:00:00:00",
+                "hdr.ethernet.dstAddr": "ff:ff:ff:ff:ff:ff"
+            },
+            action_name="MyIngress.flooding",
+            action_params={
+            })
+        sw_id.WriteTableEntry(table_entry)
+        print "Installed broadcast rule on %s" % sw_id.name
 
     def writeIpv4ForceForwardRules(self, p4info_helper, sw_id):
         table_entry = p4info_helper.buildTableEntry(
@@ -266,9 +266,6 @@ class Controller(object):
                                 lldp_Sender.run(new_topo)
                         # except Exception as e:
                         #     print  'errorrrr', e
-
-                    elif type == 4:
-                        pass
                     else:
                         # if pkt_eth_src in mac_to_port[s1.name]:
                         #     writeIpv4Rules(p4info_helper,s1,pkt_eth_src,mac_to_port[s1.name][pkt_eth_src])
@@ -390,8 +387,8 @@ class Controller(object):
                 ])
                 switch.WritePREEntry(mc_group_entry)
                 print "Installed mgrp on %s."%switch.name
-                # self.writeBroadcastRules(p4info_helper, switch)
-                self.writeIpv4ForceForwardRules(p4info_helper, switch)
+                self.writeBroadcastRules(p4info_helper, switch)
+                #self.writeIpv4ForceForwardRules(p4info_helper, switch)
                 self.readTableRules(p4info_helper, switch)
             """
             s1 = bmv2.Bmv2SwitchConnection(
