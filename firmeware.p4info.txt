@@ -92,5 +92,18 @@ actions {
     alias: "flooding"
   }
 }
+controller_packet_metadata {
+  preamble {
+    id: 76689799
+    name: "packet_out"
+    alias: "packet_out"
+    annotations: "@controller_header(\"packet_out\")"
+  }
+  metadata {
+    id: 1
+    name: "egress_spec"
+    bitwidth: 16
+  }
+}
 type_info {
 }

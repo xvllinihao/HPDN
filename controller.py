@@ -32,9 +32,10 @@ CPU_PORT = 64
 TYPE_PROBE = 5
 
 class LLDP_Sender(object):
-    def __init__(self, switch):
+    def __init__(self, switch, helper):
         super(LLDP_Sender, self).__init__()
         self.sw = switch
+        self.helper = helper
 
     def generate_lldp_packet(self, port, topo):
         pkt = Ether(src='00:00:00:00:00:00', dst="ff:ff:ff:ff:ff:ff")
@@ -50,16 +51,20 @@ class LLDP_Sender(object):
         pkt = pkt / topo
 
         zeros = struct.pack(">q", 0)
-        ingress_port = struct.pack(">H", port)
+        ingress_port = struct.pack(">H", 0)
         type = struct.pack(">H", 5)
 
         timestamp = time.mktime(datetime.datetime.now().timetuple())
         timestamp = struct.pack(">q", timestamp)
 
         switch_id = struct.pack(">H", int(self.sw.name[1:]))
-        src_port = struct.pack(">H", int(port))
+        src_port = struct.pack(">H", port)
+        # src_port = "\000\00%d"%port
 
-        header = zeros + ingress_port + type + timestamp + switch_id + src_port
+
+        # packet_out = struct.pack(">H", port)
+
+        header = zeros + ingress_port + type + timestamp + switch_id + src_port # + packet_out
 
         print "%s sending LLDP packet on port"%self.sw.name + str(port)
         return (header + str(pkt))
@@ -68,6 +73,13 @@ class LLDP_Sender(object):
         for i in range(1, 6):
             packet_out = p4runtime_pb2.PacketOut()
             packet_out.payload = self.generate_lldp_packet(i, topo)
+
+            # packet_out = self.helper.buildPacketOut(
+            #     payload = self.generate_lldp_packet(i, topo),
+            #     metadata = {1: "\000\00%d"%i}
+            # )
+            print self.sw.name, "send lldp packet out"
+
             # del packet_out.metadata[:]
             # p4runtime_metadata1 = p4runtime_pb2.PacketMetadata()
             # p4runtime_metadata1.metadata_id = 1
@@ -197,21 +209,37 @@ class Controller(object):
         print "[%s:%d]" % (traceback.tb_frame.f_code.co_filename, traceback.tb_lineno)
 
     def listen_loop(self, switch, p4info_helper):
-
+        flag = True
         self.switch = switch
         self.p4info_helper = p4info_helper
 
         try:
             print 'enter'
-            lldp_Sender = LLDP_Sender(switch)
+            lldp_Sender = LLDP_Sender(switch, self.p4info_helper)
             init_topo = "+".join(str(edge) for edge in self.net.edges)
             # time.sleep(1)
             # lldp_Sender.run(init_topo)
             
             while True:
+                if flag:
+                    lldp_Sender.run(init_topo)
+                    flag = False
+
                 packetin = switch.PacketIn()
                 # counter += 1
                 payload = packetin.packet.payload
+                # metadata = packetin.packet.metadata
+                # # pkt_type = packetin.packet.metadata[1].value
+                # zeros = struct.unpack(">q", metadata[0].value)[0]
+                # in_port = struct.unpack(">H", metadata[1].value)[0]
+                # type = struct.unpack(">H", metadata[2].value)[0]
+                # timestamp = struct.unpack(">q", metadata[3].value)[0]
+                # switch_id = struct.unpack(">H", metadata[4].value)[0]
+                # src_port = struct.unpack(">H", metadata[5].value)[0]
+                # pkt = Ether(_pkt=payload)
+
+
+
                 pkt = Ether(_pkt=payload[24:])
                 # metadata = packetin.packet.metadata[0]
                 # metadata_id = metadata.metadata_id
@@ -223,6 +251,8 @@ class Controller(object):
                 timestamp = struct.unpack(">q", payload[12:20])[0]
                 switch_id = struct.unpack(">H", payload[20:22])
                 src_port = struct.unpack(">H", payload[22:24])
+
+
 
                 print switch.name, "receive"
 
@@ -319,8 +349,8 @@ class Controller(object):
                         # packet_out.metadata = metadata
                         switch.PacketOut(packet_out)
 
-                        topo = "+".join(str(edge) for edge in self.net.edges)
-                        lldp_Sender.run(topo)
+                        # topo = "+".join(str(edge) for edge in self.net.edges)
+                        # lldp_Sender.run(topo)
                         # if counter % 10 == 0:
                 # deal with arp reply
                 # flooding into switch
@@ -390,7 +420,7 @@ class Controller(object):
                 ])
                 switch.WritePREEntry(mc_group_entry)
                 print "Installed mgrp on %s."%switch.name
-                self.writeBroadcastRules(p4info_helper, switch)
+                # self.writeBroadcastRules(p4info_helper, switch)
                 #self.writeIpv4ForceForwardRules(p4info_helper, switch)
                 self.readTableRules(p4info_helper, switch)
             """

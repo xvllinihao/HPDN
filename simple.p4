@@ -69,12 +69,13 @@ header packet_in_header_t {
     bit<16>  src_port;
 }
 
+
 // packet out
-//@controller_header("packet_out")
-//header packet_out_header_t {
-    //bit<16> egress_port;
+@controller_header("packet_out")
+header packet_out_header_t {
+    bit<16> egress_spec;
     //bit<16> TYPE;
-//}
+}
 
 struct metadata {
     //@metadate
@@ -116,9 +117,19 @@ parser MyParser(packet_in packet,
             //CPU_PORT: parse_packet_out;
             default: parse_ethernet;
         }
+        /*transition select(standard_metadata.ingress_port) {
+            CPU_PORT: parse_packet_out;
+            default: parse_ethernet;
+        }*/
         //packet.extract(hdr.packet_out_header);
         //transition parse_ethernet;
     }
+    /*state parse_packet_out {
+        packet.extract(hdr.packet_out_header);
+        transition parse_ethernet;
+    }*/
+
+
     state parse_packet_in_header {
         packet.extract(hdr.packet_in_header);
         transition parse_ethernet;
@@ -161,9 +172,8 @@ control MyIngress(inout headers hdr,
     }
     action send_to_cpu() {
         standard_metadata.egress_spec = CPU_PORT;
-        hdr.packet_in_header.setValid();
-        hdr.packet_in_header.zeros = (bit<64>)0;
         hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port;
+
         //meta.ingress_port = (bit<16>)standard_metadata.ingress_port;
         //meta.ingress_port = (bit<32>)standard_metadata.ingress_port;
         //hdr.ipv4.setValid();
@@ -201,7 +211,6 @@ control MyIngress(inout headers hdr,
             ipv4_force_forward;
         }
         size = 1024;
-        //default_action = drop();
         default_action = send_to_cpu();
     }
 
@@ -211,8 +220,17 @@ control MyIngress(inout headers hdr,
         //if (hdr.packet_in_header.isValid()){
             //ipv4_forward();
         //}
-        if (hdr.packet_in_header.isValid()) {
-            send_to_cpu();
+        if(!hdr.packet_in_header.isValid()){
+        hdr.packet_in_header.setValid();
+        }
+        //hdr.packet_out_header.setValid();
+        //hdr.packet_in_header.zeros = (bit<64>)0;
+        //hdr.packet_in_header.ingress_port = (bit<16>)standard_metadata.ingress_port;
+
+	if (standard_metadata.ingress_port == CPU_PORT) {
+		//standard_metadata.egress_spec = (bit<9>)hdr.packet_out_header.egress_spec;
+		standard_metadata.egress_spec = (bit<9>)hdr.packet_in_header.src_port;
+		//hdr.packet_out_header.setInvalid();
         }
         else{
             ipv4_exact.apply();
@@ -266,6 +284,7 @@ control MyComputeChecksum(inout headers  hdr, inout metadata meta) {
 
 control MyDeparser(packet_out packet, in headers hdr) {
     apply {
+        //packet.emit(hdr);
         packet.emit(hdr.packet_in_header);
         //packet.emit(hdr.packet_out_header);
         packet.emit(hdr.ethernet);

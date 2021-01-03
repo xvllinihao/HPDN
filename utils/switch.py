@@ -80,11 +80,11 @@ class SwitchConnection(object):
             print "P4 Runtime WritePacketOut: ", request
         else:
             self.requests_stream.put(request)
-            tmp_item = None
-            for item in self.stream_msg_resp:
-                tmp_item = item
-                break
-            return tmp_item
+            # tmp_item = None
+            # for item in self.stream_msg_resp:
+            #     tmp_item = item
+            #     break
+            # return tmp_item
 
     @abstractmethod
     def buildDeviceConfig(self, **kwargs):
