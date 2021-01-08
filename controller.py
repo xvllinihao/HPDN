@@ -4,6 +4,7 @@ import os
 import sys
 import threading
 from collections import defaultdict
+from random import random, randint
 from time import sleep
 
 from scapy.contrib.lldp import LLDPDU
@@ -28,68 +29,43 @@ from utils import helper, bmv2, convert
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'utils/'))
 from utils.switch import ShutdownAllSwitchConnections
 
-CPU_PORT = 64
+CPU_PORT = 257
 TYPE_PROBE = 5
 
+
 class LLDP_Sender(object):
-    def __init__(self, switch, helper):
+    def __init__(self, switch):
         super(LLDP_Sender, self).__init__()
         self.sw = switch
-        self.helper = helper
 
     def generate_lldp_packet(self, port, topo):
         pkt = Ether(src='00:00:00:00:00:00', dst="ff:ff:ff:ff:ff:ff")
-        # lldp_chassis_id = lldp.LLDPDUChassisID(id=str.encode(self.sw.name))
-        # lldp_port_id = lldp.LLDPDUPortID(id=struct.pack(">H", port))
-        # lldp_time_to_live = lldp.LLDPDUTimeToLive(ttl=1)
-        # lldp_end_of_lldp = lldp.LLDPDUEndOfLLDPDU()
-        topo = struct.pack("!%ds"%len(topo), topo)
+        topo = struct.pack("!%ds" % len(topo), topo)
 
-
-
-        # pkt = pkt / lldp_chassis_id / lldp_port_id / lldp_time_to_live / lldp_end_of_lldp / topo
         pkt = pkt / topo
 
         zeros = struct.pack(">q", 0)
-        ingress_port = struct.pack(">H", 0)
+        ingress_port = struct.pack(">H", port)
         type = struct.pack(">H", 5)
 
-        timestamp = time.mktime(datetime.datetime.now().timetuple())
+        timestamp = time.mktime(datetime.datetime.now().timetuple()) # + randint(100000000, 200000000)
+        timestamp = time.time() * 100 # + randint(100000000, 200000000)
+        # timestamp = time.time_ns()
         timestamp = struct.pack(">q", timestamp)
 
         switch_id = struct.pack(">H", int(self.sw.name[1:]))
-        src_port = struct.pack(">H", port)
-        # src_port = "\000\00%d"%port
+        src_port = struct.pack(">H", int(port))
 
-
-        # packet_out = struct.pack(">H", port)
-
-        header = zeros + ingress_port + type + timestamp + switch_id + src_port # + packet_out
-
-        print "%s sending LLDP packet on port"%self.sw.name + str(port)
+        header = zeros + ingress_port + type + timestamp + switch_id + src_port
         return (header + str(pkt))
 
     def run(self, topo):
-        for i in range(1, 6):
+        for i in range(1, 64):
             packet_out = p4runtime_pb2.PacketOut()
             packet_out.payload = self.generate_lldp_packet(i, topo)
-
-            # packet_out = self.helper.buildPacketOut(
-            #     payload = self.generate_lldp_packet(i, topo),
-            #     metadata = {1: "\000\00%d"%i}
-            # )
-            print self.sw.name, "send lldp packet out"
-
-            # del packet_out.metadata[:]
-            # p4runtime_metadata1 = p4runtime_pb2.PacketMetadata()
-            # p4runtime_metadata1.metadata_id = 1
-            # p4runtime_metadata1.value = struct.pack(">H", i)
-            # packet_out.metadata.append(p4runtime_metadata1)
-            # p4runtime_metadata2 = p4runtime_pb2.PacketMetadata()
-            # p4runtime_metadata2.metadata_id = 2
-            # p4runtime_metadata2.value = struct.pack(">H", 5)
-            # packet_out.metadata.append(p4runtime_metadata2)
+            # print self.sw.name, "sending lldp"
             self.sw.PacketOut(packet_out)
+
 
 class Controller(object):
     def __init__(self, switches):
@@ -97,8 +73,10 @@ class Controller(object):
         self.switches = switches
         self.listen_threads = []
         self.mac_to_port = defaultdict(dict)
-        self.net = nx.Graph()
+        self.net = nx.DiGraph()
         self.timestamp_set = set()
+        self.switch2_switch_port = defaultdict(set)
+        self.switch_host = defaultdict(set)
 
     def writeIpv4Rules(self, p4info_helper, sw_id, src_ip_addr, dst_ip_addr, port):
         for response in sw_id.ReadTableEntries():
@@ -124,7 +102,6 @@ class Controller(object):
         sw_id.WriteTableEntry(table_entry)
         print "Installed ingress forwarding rule on %s" % sw_id.name
 
-
     def writeFloodingRules(self, p4info_helper, sw_id, src_ip_addr, dst_ip_addr):
         for response in sw_id.ReadTableEntries():
             for entity in response.entities:
@@ -147,7 +124,6 @@ class Controller(object):
             })
         sw_id.WriteTableEntry(table_entry)
         print "Installed ingress flooding rule on %s" % sw_id.name
-
 
     def writeBroadcastRules(self, p4info_helper, sw_id):
         table_entry = p4info_helper.buildTableEntry(
@@ -175,7 +151,6 @@ class Controller(object):
         sw_id.WriteTableEntry(table_entry)
         print "Installed ipv4_force_forward rule on %s" % sw_id.name
 
-
     def readTableRules(self, p4info_helper, sw):
         """
         Reads the table entries from all tables on the switch.
@@ -199,7 +174,8 @@ class Controller(object):
                     print p4info_helper.get_action_param_name(action_name, p.param_id),
                     print '%r' % p.value,
                 print
-
+        print '\n----Read topo information for %s -------' % sw.name
+        print self.net.edges
 
     def printGrpcError(self, e):
         print "gRPC Error:", e.details(),
@@ -209,192 +185,159 @@ class Controller(object):
         print "[%s:%d]" % (traceback.tb_frame.f_code.co_filename, traceback.tb_lineno)
 
     def listen_loop(self, switch, p4info_helper):
-        flag = True
-        self.switch = switch
+
+        # self.switch = switch
         self.p4info_helper = p4info_helper
 
-        try:
-            print 'enter'
-            lldp_Sender = LLDP_Sender(switch, self.p4info_helper)
-            init_topo = "+".join(str(edge) for edge in self.net.edges)
-            # time.sleep(1)
-            # lldp_Sender.run(init_topo)
-            
-            while True:
-                if flag:
-                    lldp_Sender.run(init_topo)
-                    flag = False
+        # try:
+        flag = True
+        print 'enter'
+        lldp_Sender = LLDP_Sender(switch)
+        init_topo = "+".join(str(edge) for edge in self.net.edges)
+        # time.sleep(1)
+        # lldp_Sender.run(init_topo)
 
-                packetin = switch.PacketIn()
-                # counter += 1
-                payload = packetin.packet.payload
-                # metadata = packetin.packet.metadata
-                # # pkt_type = packetin.packet.metadata[1].value
-                # zeros = struct.unpack(">q", metadata[0].value)[0]
-                # in_port = struct.unpack(">H", metadata[1].value)[0]
-                # type = struct.unpack(">H", metadata[2].value)[0]
-                # timestamp = struct.unpack(">q", metadata[3].value)[0]
-                # switch_id = struct.unpack(">H", metadata[4].value)[0]
-                # src_port = struct.unpack(">H", metadata[5].value)[0]
-                # pkt = Ether(_pkt=payload)
+        while True:
+            if flag:
+                lldp_Sender.run(init_topo)
+                flag = False
 
+            packetin = switch.PacketIn()
+            payload = packetin.packet.payload
+            pkt = Ether(_pkt=payload[24:])
+            zeros = struct.unpack(">q", payload[:8])[0]
+            in_port = struct.unpack(">H", payload[8:10])[0]
+            type = struct.unpack(">H", payload[10:12])[0]
+            timestamp = struct.unpack(">q", payload[12:20])[0]
+            switch_id = struct.unpack(">H", payload[20:22])[0]
+            src_port = struct.unpack(">H", payload[22:24])[0]
 
+            if zeros == 0:
+                pkt_eth_src = pkt.getlayer(Ether).src
+                pkt_eth_dst = pkt.getlayer(Ether).dst
+                ether_type = pkt.getlayer(Ether).type
 
-                pkt = Ether(_pkt=payload[24:])
-                # metadata = packetin.packet.metadata[0]
-                # metadata_id = metadata.metadata_id
-                # port = metadata.value
-                # pkt_type = packetin.packet.metadata[1].value
-                zeros = struct.unpack(">q", payload[:8])[0]
-                in_port = struct.unpack(">H", payload[8:10])[0]
-                type = struct.unpack(">H", payload[10:12])[0]
-                timestamp = struct.unpack(">q", payload[12:20])[0]
-                switch_id = struct.unpack(">H", payload[20:22])
-                src_port = struct.unpack(">H", payload[22:24])
+                # self send lldp
+                if type == TYPE_PROBE:
+                    # topo_receive = struct.unpack("!%ds" % len(payload[24:]), payload[24:])
+                    # print switch.name, "topo_receive ", topo_receive
+                    # print "timestamp", timestamp
+                    # try:
+                    if timestamp not in self.timestamp_set:
+                        renew_flag = False
 
-
-
-                print switch.name, "receive"
-
-                if zeros == 0:
-
-
-                    pkt_eth_src = pkt.getlayer(Ether).src
-                    pkt_eth_dst = pkt.getlayer(Ether).dst
-                    ether_type = pkt.getlayer(Ether).type
-
-                    # self.net.add_node(pkt_eth_src)
-                    # self.net.add_node(pkt_eth_dst)
-
-                    # self send lldp
-                    if type == TYPE_PROBE:
-                        # try:
-                            if timestamp not in self.timestamp_set:
-                                self.timestamp_set.add(timestamp)
-                                topo_receive = struct.unpack("!%ds"%len(payload[20:]), payload[20:])
-                                print "topo_receive ", topo_receive
-                                if topo_receive[0].find('(') != -1:
-                                    topo_receive = topo_receive[0][(topo_receive[0].find('(')):].split('+')
-                                    for edge in topo_receive:
-                                        nodes = edge.split(',')
-                                        in_node = eval(nodes[0][1:])
-                                        out_node = eval(nodes[1][1:-1])
-                                        if not self.net.has_edge(in_node, out_node):
-                                            self.net.add_edge(in_node, out_node)
-                                else:
-                                    # pkt = Ether(_pkt=payload)
-                                    # # lldp_pkt = lldp.Packet(payload[26:])
-                                    src_sw_id = "s%d"%switch_id
-                                    print "src_dp_id", src_sw_id
-                                    # src_port = pkt.payload.id
-                                    self.net.add_edge(switch.name, src_sw_id)
-                                    self.net.add_edge(src_sw_id, switch.name)
-
-
-                                print "new_topo", self.net.edges
-                                new_topo = "+".join(str(edge) for edge in self.net.edges)
-                                lldp_Sender.run(new_topo)
-                        # except Exception as e:
-                        #     print  'errorrrr', e
-                    else:
-                        # if pkt_eth_src in mac_to_port[s1.name]:
-                        #     writeIpv4Rules(p4info_helper,s1,pkt_eth_src,mac_to_port[s1.name][pkt_eth_src])
-
-                        # if ether_type == 2048 or ether_type == 2054:
-                        # writeIpv4Rules(p4info_helper, s1, pkt_eth_src, port)
-                        if in_port == CPU_PORT:
-                            continue
-                        self.mac_to_port[switch.name][pkt_eth_src] = in_port
-                        print switch.name, pkt_eth_src, "in_port", in_port
-                        if pkt_eth_dst not in self.mac_to_port[switch.name]:
-                            self.writeFloodingRules(p4info_helper, switch, pkt_eth_src, pkt_eth_dst)
-                            # self.readTableRules(p4info_helper, switch)
-
-                            # for i in range(1, 7):
-                            #     zeros = struct.pack(">q", 0)
-                            #     ingress_port = struct.pack(">H", 0)
-                            #     type = struct.pack(">H", 0)
-                            #     timestamp = time.mktime(datetime.datetime.now().timetuple())
-                            #     timestamp = struct.pack(">q", timestamp)
-                            #     switch_id = struct.pack(">H", int(switch.name[1:]))
-                            #     src_port = struct.pack(">H", int(i))
+                        self.timestamp_set.add(timestamp)
+                        topo_receive = struct.unpack("!%ds" % len(payload[24:]), payload[24:])
+                        print switch.name, "topo_receive ", topo_receive, "from ", switch_id
+                        src_sw_id = "s%d" % switch_id
+                        # if not self.net.has_edge(switch.name, src_sw_id):
+                            # self.net.add_edge(switch.name, src_sw_id, src_port=src_port, dst_port=in_port)
+                            # self.net.add_edge(src_sw_id, switch.name, src_port=in_port, dst_port=src_port)
                             #
-                            #     header = zeros + ingress_port + type + timestamp + switch_id + src_port
-                            #     packet_out = p4runtime_pb2.PacketOut()
-                            #     packet_out.payload = header + payload[24:]
-                            #     switch.PacketOut(packet_out)
+                            # self.switch2_switch_port[src_sw_id].append(src_port)
+                            # self.switch2_switch_port[switch.name].append(in_port)
 
-                        else:
-                            src_port = self.mac_to_port[switch.name][pkt_eth_dst]
-                            print 'src_port', src_port
+                        self.net.add_edge(switch.name, src_sw_id, src_port=in_port, dst_port=src_port)
+                        self.net.add_edge(src_sw_id, switch.name, src_port=src_port, dst_port=in_port)
 
-                            dst_port = self.mac_to_port[switch.name][pkt_eth_src]
-                            print 'dst_port', dst_port
+                        self.switch2_switch_port[src_sw_id].add(src_port)
+                        self.switch2_switch_port[switch.name].add(in_port)
 
-                            self.writeIpv4Rules(p4info_helper, switch, pkt_eth_src, pkt_eth_dst, self.mac_to_port[switch.name][pkt_eth_dst])
-                            self.writeIpv4Rules(p4info_helper, switch, pkt_eth_dst, pkt_eth_src, self.mac_to_port[switch.name][pkt_eth_src])
+                        # renew_flag = True
 
-                            print switch.name, 'mac_to_port', self.mac_to_port
+                        if topo_receive[0].find('(') != -1:
+                            topo_receive = topo_receive[0][(topo_receive[0].find('(')):].split('+')
+                            for edge in topo_receive:
+                                nodes = edge.split(',')
+                                in_node = eval(nodes[0][1:])
+                                out_node = eval(nodes[1][1:-1])
+                                if not self.net.has_edge(in_node, out_node):
+                                    self.net.add_edge(in_node, out_node)
+                                    self.net.add_edge(out_node, in_node)
 
-                            self.net.add_edge(pkt_eth_src, switch.name, src_port=src_port, dst_port=dst_port)
-                            self.net.add_edge(switch.name, pkt_eth_src, src_port=dst_port, dst_port=src_port)
+                        self_topo = [str(edge) for edge in self.net.edges]
+                        print "self_topo", self_topo
+                        print "topo_receive", topo_receive
+                        if self_topo != topo_receive:
+                            renew_flag = True
 
-                        self.readTableRules(p4info_helper, switch)
+                        if renew_flag:
+                            print switch.name, "new_topo", self.net.edges
+                            new_topo = "+".join(str(edge) for edge in self.net.edges)
+                            lldp_Sender.run(new_topo)
 
-                        packet_out = p4runtime_pb2.PacketOut()
-                        packet_out.payload = payload
-                        # def packet_Out(s1,packetout):
-                        #     s1.PacketOut(packetout)
-                        # thread.start_new_thread(packet_Out,(s1,packet_out))
-                        # packet_out.metadata = metadata
-                        switch.PacketOut(packet_out)
 
-                        # topo = "+".join(str(edge) for edge in self.net.edges)
-                        # lldp_Sender.run(topo)
-                        # if counter % 10 == 0:
-                # deal with arp reply
-                # flooding into switch
+                #ping packet
                 else:
-                    # if timestamp not in self.timestamp_set:
-                    #     self.timestamp_set.add(timestamp)
-                    '''
-                    pkt = Ether(_pkt=payload)
-                    pkt_eth_src = pkt.getlayer(Ether).src
-                    pkt_eth_dst = pkt.getlayer(Ether).dst
-                    ether_type = pkt.getlayer(Ether).type
-                    print "nsml"
-                    self.mac_to_port[switch.name][pkt_eth_src] = port
+                    if not self.mac_to_port[switch.name].has_key(pkt_eth_src):
+                        self.mac_to_port[switch.name][pkt_eth_src] = in_port
+                    elif in_port in self.switch2_switch_port[switch.name] and pkt_eth_src in self.switch_host[switch.name]:
+                        continue
+
+                    #add host to net
+                    if pkt_eth_src not in self.net and in_port not in self.switch2_switch_port[switch.name]:
+                        self.net.add_edge(pkt_eth_src, switch.name, src_port=-1, dst_port=in_port)
+                        self.net.add_edge(switch.name, pkt_eth_src, src_port=in_port, dst_port=-1)
+
+                        self.switch_host[switch.name].add(pkt_eth_src)
+
+                    # print switch.name, pkt_eth_src, "in_port", in_port
                     if pkt_eth_dst not in self.mac_to_port[switch.name]:
-                        self.writeFloodingRules(p4info_helper, switch, pkt_eth_src, pkt_eth_dst)
+                        # self.writeFloodingRules(p4info_helper, switch, pkt_eth_src, pkt_eth_dst)
+
+                        # packet_out = p4runtime_pb2.PacketOut()
+                        # packet_out.payload = payload
+
+                        for i in range(1, 64):
+                            if i != in_port:
+                                zeros = struct.pack(">q", 0)
+                                ingress_port = struct.pack(">H", in_port)
+                                type = struct.pack(">H", 0)
+
+                                timestamp = time.mktime(datetime.datetime.now().timetuple())
+                                timestamp = struct.pack(">q", timestamp)
+
+                                switch_id = struct.pack(">H", int(switch.name[1:]))
+                                src_port = struct.pack(">H", int(i))
+
+                                header = zeros + ingress_port + type + timestamp + switch_id + src_port
+                                #
+                                packet_out = p4runtime_pb2.PacketOut()
+                                packet_out.payload = (header + payload[24:])
+                                switch.PacketOut(packet_out)
+
                     else:
-                        src_port = self.mac_to_port[switch.name][pkt_eth_dst]
-                        dst_port = self.mac_to_port[switch.name][pkt_eth_src]
+                        if pkt_eth_src in self.net and pkt_eth_dst in self.net and switch.name in self.net:
+                            path = nx.shortest_path(self.net, pkt_eth_src, pkt_eth_dst)
+                            if switch.name in path:
+                                next = path[path.index(switch.name) + 1]
+                                print switch.name, next
+                                out_port = self.net[switch.name][next]['src_port']
+                                self.mac_to_port[switch.name][pkt_eth_dst] = out_port
+
+
 
                         self.writeIpv4Rules(p4info_helper, switch, pkt_eth_src, pkt_eth_dst,
                                             self.mac_to_port[switch.name][pkt_eth_dst])
                         self.writeIpv4Rules(p4info_helper, switch, pkt_eth_dst, pkt_eth_src,
                                             self.mac_to_port[switch.name][pkt_eth_src])
-                        # self.net.add_edge(pkt_eth_src, switch.name, src_port=src_port, dst_port=dst_port)
-                        # self.net.add_edge(pkt_eth_dst, switch.name, src_port=src_port, dst_port=dst_port)
-                    self.readTableRules(p4info_helper, switch)
+                        self.readTableRules(p4info_helper, switch)
 
-                    packet_out = p4runtime_pb2.PacketOut()
-                    packet_out.payload = payload
-                        # def packet_Out(s1,packetout):
-                        #     s1.PacketOut(packetout)
-                        # thread.start_new_thread(packet_Out,(s1,packet_out))
-                        # packet_out.metadata = metadata
-                    switch.PacketOut(packet_out)
-                    topo = "+".join(str(edge) for edge in self.net.edges)
-                    lldp_Sender.run(topo)
-                    # topo = "+".join(str(edge) for edge in self.net.edges)
-                    # LLDP_Sender.run(topo)
-                    '''
-                    pass
-        except Exception as e:
-            print e
+                        packet_out = p4runtime_pb2.PacketOut()
+                        packet_out.payload = payload[24:]
+                        switch.PacketOut(packet_out)
 
-
+                        topo = "+".join(str(edge) for edge in self.net.edges)
+                        print "lldp send"
+                        lldp_Sender.run(topo)
+            # deal with arp reply
+            # flooding into switch
+            else:
+                # if timestamp not in self.timestamp_set:
+                #     self.timestamp_set.add(timestamp)
+                pass
+        # except Exception as e:
+        #     print e
 
     def start(self, p4info_file_path, bmv2_file_path):
         p4info_helper = helper.P4InfoHelper(p4info_file_path)
@@ -406,9 +349,9 @@ class Controller(object):
             for switch in self.switches:
                 switch.MasterArbitrationUpdate()
                 switch.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
-                                           bmv2_json_file_path=bmv2_file_path)
+                                                   bmv2_json_file_path=bmv2_file_path)
 
-                print "Installed P4 Program using SetForwardingPipelineConfig on %s"%switch.name
+                print "Installed P4 Program using SetForwardingPipelineConfig on %s" % switch.name
                 mc_group_entry = p4info_helper.buildMulticastGroupEntry(1, replicas=[
                     {'egress_port': 1, 'instance': 1},
                     {'egress_port': 2, 'instance': 2},
@@ -419,59 +362,10 @@ class Controller(object):
 
                 ])
                 switch.WritePREEntry(mc_group_entry)
-                print "Installed mgrp on %s."%switch.name
+                print "Installed mgrp on %s." % switch.name
                 # self.writeBroadcastRules(p4info_helper, switch)
-                #self.writeIpv4ForceForwardRules(p4info_helper, switch)
+                # self.writeIpv4ForceForwardRules(p4info_helper, switch)
                 self.readTableRules(p4info_helper, switch)
-            """
-            s1 = bmv2.Bmv2SwitchConnection(
-                name='s0',
-                address='127.0.0.1:50051',
-                device_id=1)
-
-            s2 = bmv2.Bmv2SwitchConnection(
-                name='s1',
-                address='127.0.0.1:50052',
-                device_id=2)
-
-            # Send master arbitration update message to establish this controller as
-            # master (required by P4Runtime before performing any other write operation)
-            s1.MasterArbitrationUpdate()
-            s2.MasterArbitrationUpdate()
-            # Install the P4 program on the switches
-            s1.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
-                                           bmv2_json_file_path=bmv2_file_path)
-
-            print "Installed P4 Program using SetForwardingPipelineConfig on s1"
-
-            s2.SetForwardingPipelineConfig(p4info=p4info_helper.p4info,
-                                           bmv2_json_file_path=bmv2_file_path)
-
-            print "Installed P4 Program using SetForwardingPipelineConfig on s2"
-            # Write the rules that tunnel traffic from h1-h2 to s1
-            # writeIpv4Rules(p4info_helper, sw_id=s1, dst_ip_addr="10.10.10.1", port = 1)
-            # writeIpv4Rules(p4info_helper, sw_id=s1, dst_ip_addr="10.10.10.2", port = 2)
-            # writeIpv4Rules(p4info_helper, sw_id=s1, dst_ip_addr="10.10.3.3", port = 3)
-            # readTableRules(p4info_helper, s1)
-            mc_group_entry = p4info_helper.buildMulticastGroupEntry(1, replicas=[
-                {'egress_port': 1, 'instance': 1},
-                {'egress_port': 2, 'instance': 2},
-                {'egress_port': 3, 'instance': 3},
-                {'egress_port': 4, 'instance': 4},
-                {'egress_port': 5, 'instance': 5},
-                {'egress_port': 64, 'instance': 64}
-
-            ])
-            s1.WritePREEntry(mc_group_entry)
-            print "Installed mgrp on s1."
-            self.writeBroadcastRules(p4info_helper, s1)
-            self.readTableRules(p4info_helper, s1)
-
-            s2.WritePREEntry(mc_group_entry)
-            print "Installed mgrp on s2."
-            self.writeBroadcastRules(p4info_helper, s2)
-            self.readTableRules(p4info_helper, s2)
-            """
 
             for switch in self.switches:
                 listen_thread = threading.Thread(target=self.listen_loop, args=(switch, p4info_helper))
@@ -484,73 +378,6 @@ class Controller(object):
             for listen_thread in self.listen_threads:
                 listen_thread.join()
 
-            # listen_thread1 = threading.Thread(target=self.listen_loop,args=(s1, p4info_helper))
-            # listen_thread1.setDaemon(True)
-            # listen_thread1.start()
-            #
-            # listen_thread2 = threading.Thread(target=self.listen_loop,args=(s2, p4info_helper))
-            # listen_thread2.setDaemon(True)
-            # listen_thread2.start()
-            #
-            # listen_thread1.join()
-            # listen_thread2.join()
-            # listen_thread1 = thread.start_new_thread(listen_loop, (s1, p4info_helper))
-            # listen_thread2 = thread.start_new_thread(listen_loop, (s2, p4info_helper))
-            # LLDP_Sender.run()
-            # LLDP_Sender.start()
-            # counter = 0
-            """
-            while True:
-                packetin = s1.PacketIn()
-                # counter += 1
-                payload = packetin.packet.payload
-                pkt = Ether(_pkt=payload[12:])
-                # metadata = packetin.packet.metadata[0]
-                # metadata_id = metadata.metadata_id
-                # port = metadata.value
-                # pkt_type = packetin.packet.metadata[1].value
-                zeros = struct.unpack(">q", payload[:8])[0]
-                port = struct.unpack(">H", payload[8:10])[0]
-                type = struct.unpack(">H", payload[10:12])[0]
-    
-                if zeros == 0:
-                    pkt_eth_src = pkt.getlayer(Ether).src
-                    pkt_eth_dst = pkt.getlayer(Ether).dst
-                    ether_type = pkt.getlayer(Ether).type
-                    # net.add_node()
-                    
-                    # self send lldp
-                    if type == 5:
-                        pass
-                    elif type == 4:
-                        pass
-                    else:
-                        LLDP_Sender.run()
-                        # if pkt_eth_src in mac_to_port[s1.name]:
-                        #     writeIpv4Rules(p4info_helper,s1,pkt_eth_src,mac_to_port[s1.name][pkt_eth_src])
-    
-                        # if ether_type == 2048 or ether_type == 2054:
-                        # writeIpv4Rules(p4info_helper, s1, pkt_eth_src, port)
-    
-                        mac_to_port[s1.name][pkt_eth_src] = port
-                        if pkt_eth_dst not in mac_to_port[s1.name]:
-                            writeFloodingRules(p4info_helper, s1, pkt_eth_src, pkt_eth_dst)
-                        else:
-                            writeIpv4Rules(p4info_helper, s1, pkt_eth_src, pkt_eth_dst, mac_to_port[s1.name][pkt_eth_dst])
-                            writeIpv4Rules(p4info_helper, s1, pkt_eth_dst, pkt_eth_src, mac_to_port[s1.name][pkt_eth_src])
-                        readTableRules(p4info_helper, s1)
-    
-                        packet_out = p4runtime_pb2.PacketOut()
-                        packet_out.payload = payload[12:]
-                        # def packet_Out(s1,packetout):
-                        #     s1.PacketOut(packetout)
-                        # thread.start_new_thread(packet_Out,(s1,packet_out))
-                        # packet_out.metadata = metadata
-                        s1.PacketOut(packet_out)
-                        # if counter % 10 == 0:
-                else:
-                    pass
-                """
         except KeyboardInterrupt:
             print " Shutting down."
         except grpc.RpcError as e:
@@ -578,7 +405,6 @@ if __name__ == '__main__':
         print "\nBMv2 JSON file not found!" % args.bmv2_json
         parser.exit(2)
 
-
     s1 = bmv2.Bmv2SwitchConnection(
         name='s1',
         address='127.0.0.1:50051',
@@ -596,12 +422,12 @@ if __name__ == '__main__':
         address='127.0.0.1:50053',
         device_id=3
     )
-
-    # s4 = bmv2.Bmv2SwitchConnection(
-    #     name='s4',
-    #     address='127.0.0.1:50054',
-    #     device_id=4
-    # )
+    #
+    s4 = bmv2.Bmv2SwitchConnection(
+        name='s4',
+        address='127.0.0.1:50054',
+        device_id=4
+    )
     #
     # s5 = bmv2.Bmv2SwitchConnection(
     #     name='s5',
@@ -617,6 +443,7 @@ if __name__ == '__main__':
 
     controller1 = Controller([s1, s2])
     controller2 = Controller([s3])
+    controller3 = Controller([s4])
 
     controller_thread1 = threading.Thread(target=controller1.start, args=(args.p4info, args.bmv2_json))
     # controller_thread1.setDaemon(True)
@@ -626,9 +453,10 @@ if __name__ == '__main__':
     # controller_thread2.setDaemon(True)
     controller_thread2.start()
 
+    controller_thread3 = threading.Thread(target=controller3.start, args=(args.p4info, args.bmv2_json))
+    # controller_thread2.setDaemon(True)
+    controller_thread3.start()
+
     controller_thread1.join()
     controller_thread2.join()
-
-
-
-
+    # controller_thread3.join()

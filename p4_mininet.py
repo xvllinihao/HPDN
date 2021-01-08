@@ -193,7 +193,7 @@ class P4GrpcSwitch(Switch):
             args.append("--no-p4")
         args.append("--log-flush --log-level trace --log-file %s.log" % self.name)
         if self.grpc_port:
-            args.append("-- --grpc-server-addr 0.0.0.0:" + str(self.grpc_port) + " --cpu-port 64")
+            args.append("-- --grpc-server-addr 0.0.0.0:" + str(self.grpc_port) + " --cpu-port 257")
         print ' '.join(args)
 
         self.cmd(' '.join(args) + ' > %s.log 2>&1 &' % self.name)

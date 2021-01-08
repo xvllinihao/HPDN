@@ -36,21 +36,37 @@ class SingleSwitchTopo(Topo):
         switch1 = self.addSwitch('s0', sw_path = sw_path, json_path = json_path, grpc_port = 50051, device_id = 1)
         switch2 = self.addSwitch('s1', sw_path = sw_path, json_path = json_path, grpc_port = 50052, device_id = 2)
         switch3 = self.addSwitch('s2', sw_path = sw_path, json_path = json_path, grpc_port = 50053, device_id = 3)
-
-        for h in xrange(n):
-            host = self.addHost('h%d' % (h + 1), ip = "10.10.10.%d/16" % (h + 1), mac = '00:04:00:00:00:%02x' %h)
-            self.addLink(host, switch1)
+        switch4 = self.addSwitch('s3', sw_path = sw_path, json_path = json_path, grpc_port = 50054, device_id = 4)
 
         # for h in xrange(n):
-        host3 = self.addHost('h3', ip = "10.10.10.03/16", mac = '00:04:00:00:00:03')
+        #     host = self.addHost('h%d' % (h + 1), ip = "10.10.10.%d/16" % (h + 1), mac = '00:04:00:00:00:%02x' %h)
+        #     self.addLink(host, switch1)
+
+        # for h in xrange(n):
+        host1 = self.addHost('h1', ip="10.10.10.00/16", mac='00:04:00:00:00:00')
+        self.addLink(host1, switch1)
+        host2 = self.addHost('h2', ip="10.10.10.01/16", mac='00:04:00:00:00:01')
+        self.addLink(host2, switch1)
+        host3 = self.addHost('h3', ip = "10.10.10.02/16", mac = '00:04:00:00:00:02')
         self.addLink(host3, switch2)
-        host4 = self.addHost('h4', ip = "10.10.10.04/16", mac = '00:04:00:00:00:04')
+        host4 = self.addHost('h4', ip = "10.10.10.03/16", mac = '00:04:00:00:00:03')
         self.addLink(host4, switch2)
-        host5 = self.addHost('h5', ip = "10.10.10.05/16", mac = '00:04:00:00:00:05')
+        host5 = self.addHost('h5', ip = "10.10.10.04/16", mac = '00:04:00:00:00:04')
         self.addLink(host5, switch3)
+        host6 = self.addHost('h6', ip = "10.10.10.05/16", mac = '00:04:00:00:00:05')
+        self.addLink(host6, switch3)
+
+        host7 = self.addHost('h7', ip = "10.10.10.06/16", mac = '00:04:00:00:00:06')
+        self.addLink(host7, switch4)
+        host8 = self.addHost('h8', ip = "10.10.10.07/16", mac = '00:04:00:00:00:07')
+        self.addLink(host8, switch4)
 
         self.addLink(switch1, switch2)
         self.addLink(switch3, switch2)
+        # self.addLink(switch1, switch3)
+        self.addLink(switch1, switch4)
+        self.addLink(switch3, switch4)
+
 
         # server =  self.addHost('s1', ip = "10.10.3.3/16", mac = '00:00:01:01:01:01')
         # self.addLink('h1','h2')
