@@ -19,6 +19,12 @@ tables {
     bitwidth: 48
     match_type: EXACT
   }
+  match_fields {
+    id: 3
+    name: "standard_metadata.ingress_port"
+    bitwidth: 9
+    match_type: EXACT
+  }
   action_refs {
     id: 28792405
   }

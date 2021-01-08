@@ -77,8 +77,32 @@ class Controller(object):
         self.timestamp_set = set()
         self.switch2_switch_port = defaultdict(set)
         self.switch_host = defaultdict(set)
+    #
+    # def writeIpv4Rules(self, p4info_helper, sw_id, src_ip_addr, dst_ip_addr, port):
+    #     for response in sw_id.ReadTableEntries():
+    #         for entity in response.entities:
+    #             entry = entity.table_entry
+    #             m1 = p4info_helper.get_match_field_value(entry.match[0])
+    #             m2 = p4info_helper.get_match_field_value(entry.match[1])
+    #
+    #             n1 = convert.encode(src_ip_addr, 48)
+    #             n2 = convert.encode(dst_ip_addr, 48)
+    #             if m1 == n1 and m2 == n2:
+    #                 sw_id.DeletePreEntry(entry)
+    #     table_entry = p4info_helper.buildTableEntry(
+    #         table_name="MyIngress.ipv4_exact",
+    #         match_fields={
+    #             "hdr.ethernet.srcAddr": src_ip_addr,
+    #             "hdr.ethernet.dstAddr": dst_ip_addr
+    #         },
+    #         action_name="MyIngress.ipv4_forward",
+    #         action_params={
+    #             "port": port
+    #         })
+    #     sw_id.WriteTableEntry(table_entry)
+    #     print "Installed ingress forwarding rule on %s" % sw_id.name
 
-    def writeIpv4Rules(self, p4info_helper, sw_id, src_ip_addr, dst_ip_addr, port):
+    def writeIpv4Rules(self, p4info_helper, sw_id, src_ip_addr, dst_ip_addr, port, inport):
         for response in sw_id.ReadTableEntries():
             for entity in response.entities:
                 entry = entity.table_entry
@@ -93,7 +117,8 @@ class Controller(object):
             table_name="MyIngress.ipv4_exact",
             match_fields={
                 "hdr.ethernet.srcAddr": src_ip_addr,
-                "hdr.ethernet.dstAddr": dst_ip_addr
+                "hdr.ethernet.dstAddr": dst_ip_addr,
+                "standard_metadata.ingress_port": inport
             },
             action_name="MyIngress.ipv4_forward",
             action_params={
@@ -318,13 +343,26 @@ class Controller(object):
 
 
                         self.writeIpv4Rules(p4info_helper, switch, pkt_eth_src, pkt_eth_dst,
-                                            self.mac_to_port[switch.name][pkt_eth_dst])
+                                            self.mac_to_port[switch.name][pkt_eth_dst], self.mac_to_port[switch.name][pkt_eth_src])
                         self.writeIpv4Rules(p4info_helper, switch, pkt_eth_dst, pkt_eth_src,
-                                            self.mac_to_port[switch.name][pkt_eth_src])
+                                            self.mac_to_port[switch.name][pkt_eth_src], self.mac_to_port[switch.name][pkt_eth_dst])
                         self.readTableRules(p4info_helper, switch)
 
+                        #add port
+                        zeros = struct.pack(">q", 0)
+                        ingress_port = struct.pack(">H", in_port)
+                        type = struct.pack(">H", 0)
+
+                        timestamp = time.mktime(datetime.datetime.now().timetuple())
+                        timestamp = struct.pack(">q", timestamp)
+
+                        switch_id = struct.pack(">H", int(switch.name[1:]))
+                        src_port = struct.pack(">H", self.mac_to_port[switch.name][pkt_eth_dst])
+
+                        header = zeros + ingress_port + type + timestamp + switch_id + src_port
+
                         packet_out = p4runtime_pb2.PacketOut()
-                        packet_out.payload = payload[24:]
+                        packet_out.payload = (header + payload[24:])
                         switch.PacketOut(packet_out)
 
                         topo = "+".join(str(edge) for edge in self.net.edges)

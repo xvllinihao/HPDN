@@ -192,6 +192,7 @@ control MyIngress(inout headers hdr,
         key = {
             hdr.ethernet.srcAddr: exact;
             hdr.ethernet.dstAddr: exact;
+            standard_metadata.ingress_port: exact;
         }
         actions = {
             ipv4_forward;

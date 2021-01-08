@@ -584,7 +584,7 @@
       "id" : 0,
       "source_info" : {
         "filename" : "simple.p4",
-        "line" : 271,
+        "line" : 272,
         "column" : 8,
         "source_fragment" : "MyDeparser"
       },
@@ -807,7 +807,7 @@
       ]
     },
     {
-      "name" : "simple218",
+      "name" : "simple219",
       "id" : 6,
       "runtime_data" : [],
       "primitives" : [
@@ -821,7 +821,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 218,
+            "line" : 219,
             "column" : 16,
             "source_fragment" : "hdr.packet_in_header.setInvalid()"
           }
@@ -829,7 +829,7 @@
       ]
     },
     {
-      "name" : "simple216",
+      "name" : "simple217",
       "id" : 7,
       "runtime_data" : [],
       "primitives" : [
@@ -860,7 +860,7 @@
           ],
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 216,
+            "line" : 217,
             "column" : 12,
             "source_fragment" : "standard_metadata.egress_spec = (bit<9>)hdr.packet_in_header.src_port"
           }
@@ -881,11 +881,11 @@
       "init_table" : "node_2",
       "tables" : [
         {
-          "name" : "tbl_simple216",
+          "name" : "tbl_simple217",
           "id" : 0,
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 216,
+            "line" : 217,
             "column" : 42,
             "source_fragment" : "="
           },
@@ -897,10 +897,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [7],
-          "actions" : ["simple216"],
+          "actions" : ["simple217"],
           "base_default_next" : "node_4",
           "next_tables" : {
-            "simple216" : "node_4"
+            "simple217" : "node_4"
           },
           "default_entry" : {
             "action_id" : 7,
@@ -910,11 +910,11 @@
           }
         },
         {
-          "name" : "tbl_simple218",
+          "name" : "tbl_simple219",
           "id" : 1,
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 218,
+            "line" : 219,
             "column" : 16,
             "source_fragment" : "hdr.packet_in_header.setInvalid()"
           },
@@ -926,10 +926,10 @@
           "support_timeout" : false,
           "direct_meters" : null,
           "action_ids" : [6],
-          "actions" : ["simple218"],
+          "actions" : ["simple219"],
           "base_default_next" : null,
           "next_tables" : {
-            "simple218" : null
+            "simple219" : null
           },
           "default_entry" : {
             "action_id" : 6,
@@ -958,6 +958,12 @@
               "match_type" : "exact",
               "name" : "hdr.ethernet.dstAddr",
               "target" : ["ethernet", "dstAddr"],
+              "mask" : null
+            },
+            {
+              "match_type" : "exact",
+              "name" : "standard_metadata.ingress_port",
+              "target" : ["standard_metadata", "ingress_port"],
               "mask" : null
             }
           ],
@@ -993,7 +999,7 @@
           "id" : 0,
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 215,
+            "line" : 216,
             "column" : 12,
             "source_fragment" : "hdr.packet_in_header.isValid() && standard_metadata.ingress_port == 257"
           },
@@ -1028,7 +1034,7 @@
               }
             }
           },
-          "true_next" : "tbl_simple216",
+          "true_next" : "tbl_simple217",
           "false_next" : "MyIngress.ipv4_exact"
         },
         {
@@ -1036,7 +1042,7 @@
           "id" : 1,
           "source_info" : {
             "filename" : "simple.p4",
-            "line" : 217,
+            "line" : 218,
             "column" : 16,
             "source_fragment" : "hdr.packet_in_header.type == 0"
           },
@@ -1055,7 +1061,7 @@
             }
           },
           "false_next" : null,
-          "true_next" : "tbl_simple218"
+          "true_next" : "tbl_simple219"
         }
       ]
     },
@@ -1064,7 +1070,7 @@
       "id" : 1,
       "source_info" : {
         "filename" : "simple.p4",
-        "line" : 233,
+        "line" : 234,
         "column" : 8,
         "source_fragment" : "MyEgress"
       },
