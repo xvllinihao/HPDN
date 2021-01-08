@@ -29,9 +29,6 @@ tables {
     id: 28792405
   }
   action_refs {
-    id: 28371790
-  }
-  action_refs {
     id: 22952082
   }
   action_refs {
@@ -39,9 +36,6 @@ tables {
   }
   action_refs {
     id: 21257015
-  }
-  action_refs {
-    id: 27384978
   }
   size: 1024
 }
@@ -77,25 +71,6 @@ actions {
     id: 1
     name: "port"
     bitwidth: 9
-  }
-}
-actions {
-  preamble {
-    id: 27384978
-    name: "MyIngress.ipv4_force_forward"
-    alias: "ipv4_force_forward"
-  }
-  params {
-    id: 1
-    name: "port"
-    bitwidth: 9
-  }
-}
-actions {
-  preamble {
-    id: 28371790
-    name: "MyIngress.flooding"
-    alias: "flooding"
   }
 }
 type_info {

@@ -1,28 +1,19 @@
 #!/usr/bin/env python2
 import argparse
+import datetime
 import os
+import struct
 import sys
 import threading
+import time
 from collections import defaultdict
-from random import random, randint
-from time import sleep
-
-from scapy.contrib.lldp import LLDPDU
-from scapy.layers.l2 import Ether
-from threading import Thread
-from scapy.contrib import lldp
-import uuid
 
 import grpc
-import networkx
-import struct
-import thread
 import networkx as nx
-
-import time, datetime
 # Import P4Runtime lib from parent utils dir
 # Probably there's a better way of doing this.
 from p4.v1 import p4runtime_pb2
+from scapy.layers.l2 import Ether
 
 from utils import helper, bmv2, convert
 
@@ -33,12 +24,12 @@ CPU_PORT = 257
 TYPE_PROBE = 5
 
 
-class LLDP_Sender(object):
+class Probe_Sender(object):
     def __init__(self, switch):
-        super(LLDP_Sender, self).__init__()
+        super(Probe_Sender, self).__init__()
         self.sw = switch
 
-    def generate_lldp_packet(self, port, topo):
+    def generate_probe_packet(self, port, topo):
         pkt = Ether(src='00:00:00:00:00:00', dst="ff:ff:ff:ff:ff:ff")
         topo = struct.pack("!%ds" % len(topo), topo)
 
@@ -48,9 +39,8 @@ class LLDP_Sender(object):
         ingress_port = struct.pack(">H", port)
         type = struct.pack(">H", 5)
 
-        timestamp = time.mktime(datetime.datetime.now().timetuple()) # + randint(100000000, 200000000)
-        timestamp = time.time() * 100 # + randint(100000000, 200000000)
-        # timestamp = time.time_ns()
+        timestamp = time.mktime(datetime.datetime.now().timetuple())  
+        timestamp = time.time() * 100 
         timestamp = struct.pack(">q", timestamp)
 
         switch_id = struct.pack(">H", int(self.sw.name[1:]))
@@ -62,8 +52,7 @@ class LLDP_Sender(object):
     def run(self, topo):
         for i in range(1, 64):
             packet_out = p4runtime_pb2.PacketOut()
-            packet_out.payload = self.generate_lldp_packet(i, topo)
-            # print self.sw.name, "sending lldp"
+            packet_out.payload = self.generate_probe_packet(i, topo)
             self.sw.PacketOut(packet_out)
 
 
@@ -71,36 +60,17 @@ class Controller(object):
     def __init__(self, switches):
         # threading.Thread.__init__(self)
         self.switches = switches
+        #use multithreads to implement listenning to multiple switches
         self.listen_threads = []
+
+
         self.mac_to_port = defaultdict(dict)
         self.net = nx.DiGraph()
         self.timestamp_set = set()
+        #record ports which connect to switch
         self.switch2_switch_port = defaultdict(set)
+        #record swtich-host connect relations
         self.switch_host = defaultdict(set)
-    #
-    # def writeIpv4Rules(self, p4info_helper, sw_id, src_ip_addr, dst_ip_addr, port):
-    #     for response in sw_id.ReadTableEntries():
-    #         for entity in response.entities:
-    #             entry = entity.table_entry
-    #             m1 = p4info_helper.get_match_field_value(entry.match[0])
-    #             m2 = p4info_helper.get_match_field_value(entry.match[1])
-    #
-    #             n1 = convert.encode(src_ip_addr, 48)
-    #             n2 = convert.encode(dst_ip_addr, 48)
-    #             if m1 == n1 and m2 == n2:
-    #                 sw_id.DeletePreEntry(entry)
-    #     table_entry = p4info_helper.buildTableEntry(
-    #         table_name="MyIngress.ipv4_exact",
-    #         match_fields={
-    #             "hdr.ethernet.srcAddr": src_ip_addr,
-    #             "hdr.ethernet.dstAddr": dst_ip_addr
-    #         },
-    #         action_name="MyIngress.ipv4_forward",
-    #         action_params={
-    #             "port": port
-    #         })
-    #     sw_id.WriteTableEntry(table_entry)
-    #     print "Installed ingress forwarding rule on %s" % sw_id.name
 
     def writeIpv4Rules(self, p4info_helper, sw_id, src_ip_addr, dst_ip_addr, port, inport):
         for response in sw_id.ReadTableEntries():
@@ -126,55 +96,6 @@ class Controller(object):
             })
         sw_id.WriteTableEntry(table_entry)
         print "Installed ingress forwarding rule on %s" % sw_id.name
-
-    def writeFloodingRules(self, p4info_helper, sw_id, src_ip_addr, dst_ip_addr):
-        for response in sw_id.ReadTableEntries():
-            for entity in response.entities:
-                entry = entity.table_entry
-                m1 = p4info_helper.get_match_field_value(entry.match[0])
-                m2 = p4info_helper.get_match_field_value(entry.match[1])
-
-                n1 = convert.encode(src_ip_addr, 48)
-                n2 = convert.encode(dst_ip_addr, 48)
-                if m1 == n1 and m2 == n2:
-                    sw_id.DeletePreEntry(entry)
-        table_entry = p4info_helper.buildTableEntry(
-            table_name="MyIngress.ipv4_exact",
-            match_fields={
-                "hdr.ethernet.srcAddr": src_ip_addr,
-                "hdr.ethernet.dstAddr": dst_ip_addr
-            },
-            action_name="MyIngress.flooding",
-            action_params={
-            })
-        sw_id.WriteTableEntry(table_entry)
-        print "Installed ingress flooding rule on %s" % sw_id.name
-
-    def writeBroadcastRules(self, p4info_helper, sw_id):
-        table_entry = p4info_helper.buildTableEntry(
-            table_name="MyIngress.ipv4_exact",
-            match_fields={
-                "hdr.ethernet.srcAddr": "00:00:00:00:00:00",
-                "hdr.ethernet.dstAddr": "ff:ff:ff:ff:ff:ff"
-            },
-            action_name="MyIngress.flooding",
-            action_params={
-            })
-        sw_id.WriteTableEntry(table_entry)
-        print "Installed broadcast rule on %s" % sw_id.name
-
-    def writeIpv4ForceForwardRules(self, p4info_helper, sw_id):
-        table_entry = p4info_helper.buildTableEntry(
-            table_name="MyIngress.ipv4_exact",
-            match_fields={
-                "hdr.ethernet.srcAddr": "00:00:00:00:00:00",
-                "hdr.ethernet.dstAddr": "ff:ff:ff:ff:ff:ff"
-            },
-            action_name="MyIngress.ipv4_force_forward",
-            action_params={
-            })
-        sw_id.WriteTableEntry(table_entry)
-        print "Installed ipv4_force_forward rule on %s" % sw_id.name
 
     def readTableRules(self, p4info_helper, sw):
         """
@@ -210,23 +131,19 @@ class Controller(object):
         print "[%s:%d]" % (traceback.tb_frame.f_code.co_filename, traceback.tb_lineno)
 
     def listen_loop(self, switch, p4info_helper):
-
-        # self.switch = switch
         self.p4info_helper = p4info_helper
-
-        # try:
         flag = True
         print 'enter'
-        lldp_Sender = LLDP_Sender(switch)
+        probe_Sender = Probe_Sender(switch)
         init_topo = "+".join(str(edge) for edge in self.net.edges)
-        # time.sleep(1)
-        # lldp_Sender.run(init_topo)
 
         while True:
+            #send initial topology
             if flag:
-                lldp_Sender.run(init_topo)
+                probe_Sender.run(init_topo)
                 flag = False
 
+            #read information form packetin packet
             packetin = switch.PacketIn()
             payload = packetin.packet.payload
             pkt = Ether(_pkt=payload[24:])
@@ -244,32 +161,23 @@ class Controller(object):
 
                 # self send lldp
                 if type == TYPE_PROBE:
-                    # topo_receive = struct.unpack("!%ds" % len(payload[24:]), payload[24:])
-                    # print switch.name, "topo_receive ", topo_receive
-                    # print "timestamp", timestamp
-                    # try:
+                    #use timestamp to filter duplications
                     if timestamp not in self.timestamp_set:
                         renew_flag = False
-
                         self.timestamp_set.add(timestamp)
+
                         topo_receive = struct.unpack("!%ds" % len(payload[24:]), payload[24:])
                         print switch.name, "topo_receive ", topo_receive, "from ", switch_id
                         src_sw_id = "s%d" % switch_id
-                        # if not self.net.has_edge(switch.name, src_sw_id):
-                            # self.net.add_edge(switch.name, src_sw_id, src_port=src_port, dst_port=in_port)
-                            # self.net.add_edge(src_sw_id, switch.name, src_port=in_port, dst_port=src_port)
-                            #
-                            # self.switch2_switch_port[src_sw_id].append(src_port)
-                            # self.switch2_switch_port[switch.name].append(in_port)
 
+                        #every time we receive information from a swtich, update the link information
                         self.net.add_edge(switch.name, src_sw_id, src_port=in_port, dst_port=src_port)
                         self.net.add_edge(src_sw_id, switch.name, src_port=src_port, dst_port=in_port)
 
                         self.switch2_switch_port[src_sw_id].add(src_port)
                         self.switch2_switch_port[switch.name].add(in_port)
 
-                        # renew_flag = True
-
+                        #update the topo
                         if topo_receive[0].find('(') != -1:
                             topo_receive = topo_receive[0][(topo_receive[0].find('(')):].split('+')
                             for edge in topo_receive:
@@ -280,58 +188,45 @@ class Controller(object):
                                     self.net.add_edge(in_node, out_node)
                                     self.net.add_edge(out_node, in_node)
 
+                        #if the topo we receive is different with the topo we have now, send update information
                         self_topo = [str(edge) for edge in self.net.edges]
-                        print "self_topo", self_topo
-                        print "topo_receive", topo_receive
+                        # print "self_topo", self_topo
+                        # print "topo_receive", topo_receive
                         if self_topo != topo_receive:
                             renew_flag = True
 
                         if renew_flag:
                             print switch.name, "new_topo", self.net.edges
                             new_topo = "+".join(str(edge) for edge in self.net.edges)
-                            lldp_Sender.run(new_topo)
+                            probe_Sender.run(new_topo)
 
 
-                #ping packet
+                # arp packet
                 else:
                     if not self.mac_to_port[switch.name].has_key(pkt_eth_src):
                         self.mac_to_port[switch.name][pkt_eth_src] = in_port
-                    elif in_port in self.switch2_switch_port[switch.name] and pkt_eth_src in self.switch_host[switch.name]:
+                    # avoid receiving broadcast arp packet that send by the switch itself
+                    elif in_port in self.switch2_switch_port[switch.name] and pkt_eth_src in self.switch_host[
+                        switch.name]:
                         continue
 
-                    #add host to net
+                    # add host to net
                     if pkt_eth_src not in self.net and in_port not in self.switch2_switch_port[switch.name]:
                         self.net.add_edge(pkt_eth_src, switch.name, src_port=-1, dst_port=in_port)
                         self.net.add_edge(switch.name, pkt_eth_src, src_port=in_port, dst_port=-1)
-
                         self.switch_host[switch.name].add(pkt_eth_src)
 
-                    # print switch.name, pkt_eth_src, "in_port", in_port
+                    '''
+                    if we don't know the dst mac address, we just record the src mac address and its inport.
+                    '''
                     if pkt_eth_dst not in self.mac_to_port[switch.name]:
-                        # self.writeFloodingRules(p4info_helper, switch, pkt_eth_src, pkt_eth_dst)
-
-                        # packet_out = p4runtime_pb2.PacketOut()
-                        # packet_out.payload = payload
-
+                        # broadcast the arp packet
                         for i in range(1, 64):
                             if i != in_port:
-                                zeros = struct.pack(">q", 0)
-                                ingress_port = struct.pack(">H", in_port)
-                                type = struct.pack(">H", 0)
-
-                                timestamp = time.mktime(datetime.datetime.now().timetuple())
-                                timestamp = struct.pack(">q", timestamp)
-
-                                switch_id = struct.pack(">H", int(switch.name[1:]))
-                                src_port = struct.pack(">H", int(i))
-
-                                header = zeros + ingress_port + type + timestamp + switch_id + src_port
-                                #
-                                packet_out = p4runtime_pb2.PacketOut()
-                                packet_out.payload = (header + payload[24:])
-                                switch.PacketOut(packet_out)
-
+                                self.patckout(i, in_port, payload, switch)
+                    # if we know the dst mac, we can write the flow table
                     else:
+                        # find shortest path
                         if pkt_eth_src in self.net and pkt_eth_dst in self.net and switch.name in self.net:
                             path = nx.shortest_path(self.net, pkt_eth_src, pkt_eth_dst)
                             if switch.name in path:
@@ -340,15 +235,16 @@ class Controller(object):
                                 out_port = self.net[switch.name][next]['src_port']
                                 self.mac_to_port[switch.name][pkt_eth_dst] = out_port
 
-
-
+                        # write rules
                         self.writeIpv4Rules(p4info_helper, switch, pkt_eth_src, pkt_eth_dst,
-                                            self.mac_to_port[switch.name][pkt_eth_dst], self.mac_to_port[switch.name][pkt_eth_src])
+                                            self.mac_to_port[switch.name][pkt_eth_dst],
+                                            self.mac_to_port[switch.name][pkt_eth_src])
                         self.writeIpv4Rules(p4info_helper, switch, pkt_eth_dst, pkt_eth_src,
-                                            self.mac_to_port[switch.name][pkt_eth_src], self.mac_to_port[switch.name][pkt_eth_dst])
+                                            self.mac_to_port[switch.name][pkt_eth_src],
+                                            self.mac_to_port[switch.name][pkt_eth_dst])
                         self.readTableRules(p4info_helper, switch)
 
-                        #add port
+                        # packet out
                         zeros = struct.pack(">q", 0)
                         ingress_port = struct.pack(">H", in_port)
                         type = struct.pack(">H", 0)
@@ -357,6 +253,7 @@ class Controller(object):
                         timestamp = struct.pack(">q", timestamp)
 
                         switch_id = struct.pack(">H", int(switch.name[1:]))
+                        #we already know the right port to transfer the packet, so we don't broadcast
                         src_port = struct.pack(">H", self.mac_to_port[switch.name][pkt_eth_dst])
 
                         header = zeros + ingress_port + type + timestamp + switch_id + src_port
@@ -365,17 +262,25 @@ class Controller(object):
                         packet_out.payload = (header + payload[24:])
                         switch.PacketOut(packet_out)
 
+                        # send topo update information
                         topo = "+".join(str(edge) for edge in self.net.edges)
-                        print "lldp send"
-                        lldp_Sender.run(topo)
-            # deal with arp reply
-            # flooding into switch
-            else:
-                # if timestamp not in self.timestamp_set:
-                #     self.timestamp_set.add(timestamp)
-                pass
-        # except Exception as e:
-        #     print e
+                        probe_Sender.run(topo)
+
+    def patckout(self, i, in_port, payload, switch):
+        zeros = struct.pack(">q", 0)
+        ingress_port = struct.pack(">H", in_port)
+        type = struct.pack(">H", 0)
+
+        timestamp = time.mktime(datetime.datetime.now().timetuple())
+        timestamp = struct.pack(">q", timestamp)
+
+        switch_id = struct.pack(">H", int(switch.name[1:]))
+        src_port = struct.pack(">H", int(i))
+        header = zeros + ingress_port + type + timestamp + switch_id + src_port
+
+        packet_out = p4runtime_pb2.PacketOut()
+        packet_out.payload = (header + payload[24:])
+        switch.PacketOut(packet_out)
 
     def start(self, p4info_file_path, bmv2_file_path):
         p4info_helper = helper.P4InfoHelper(p4info_file_path)
@@ -390,21 +295,9 @@ class Controller(object):
                                                    bmv2_json_file_path=bmv2_file_path)
 
                 print "Installed P4 Program using SetForwardingPipelineConfig on %s" % switch.name
-                mc_group_entry = p4info_helper.buildMulticastGroupEntry(1, replicas=[
-                    {'egress_port': 1, 'instance': 1},
-                    {'egress_port': 2, 'instance': 2},
-                    {'egress_port': 3, 'instance': 3},
-                    {'egress_port': 4, 'instance': 4},
-                    {'egress_port': 5, 'instance': 5},
-                    # {'egress_port': 64, 'instance': 64}
-
-                ])
-                switch.WritePREEntry(mc_group_entry)
-                print "Installed mgrp on %s." % switch.name
-                # self.writeBroadcastRules(p4info_helper, switch)
-                # self.writeIpv4ForceForwardRules(p4info_helper, switch)
                 self.readTableRules(p4info_helper, switch)
 
+            # start switch
             for switch in self.switches:
                 listen_thread = threading.Thread(target=self.listen_loop, args=(switch, p4info_helper))
                 listen_thread.setDaemon(True)
